@@ -64,6 +64,14 @@
         </header>
 
         <main class="content">
+          <div
+            id="feedbackMessage"
+            class="feedback-message"
+            role="status"
+            aria-live="polite"
+          >
+            <span id="feedbackText"></span>
+          </div>
           <section id="page-dashboard" class="page-section active">
             <div class="page-header">
               <div>
@@ -261,13 +269,7 @@
                 <div class="field">
                   <label for="motivoMovimentacao">Motivo</label>
                   <select id="motivoMovimentacao">
-                    <option value="">Selecione...</option>
-                    <option value="REPOSICAO">Reposição de estoque</option>
-                    <option value="COMPRA">Compra</option>
-                    <option value="VENDA">Venda</option>
-                    <option value="DEVOLUCAO">Devolução</option>
-                    <option value="PERDA">Perda</option>
-                    <option value="CORRECAO">Correção de saldo</option>
+                    <option value="">Selecione o tipo primeiro...</option>
                   </select>
                 </div>
               </div>
@@ -305,6 +307,13 @@
                   <strong id="resumoNovoEstoque">—</strong>
                 </div>
               </div>
+
+              <div
+                id="movimentacaoStatus"
+                class="movimentacao-status"
+                role="status"
+                aria-live="polite"
+              ></div>
 
               <div class="form-actions">
                 <button

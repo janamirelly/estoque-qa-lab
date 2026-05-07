@@ -1,6 +1,7 @@
 const produtos = [
   {
     id: 1,
+    idVariacao: 1,
     nome: "Camiseta Básica",
     sku: "CAM-AMARELO-M",
     variacao: "Amarelo / M",
@@ -9,6 +10,7 @@ const produtos = [
   },
   {
     id: 2,
+    idVariacao: 2,
     nome: "Camiseta Básica",
     sku: "CAM-BRANCO-M",
     variacao: "Branco / M",
@@ -17,14 +19,16 @@ const produtos = [
   },
   {
     id: 3,
+    idVariacao: 3,
     nome: "Calça Jeans",
-    sku: "CAL-AZUL-M",
+    sku: "CAJ-AZUL-M",
     variacao: "Azul / M",
     quantidade: 0,
     estoqueMinimo: 10,
   },
   {
     id: 4,
+    idVariacao: 4,
     nome: "Vestido Midi",
     sku: "VES-PRETO-P",
     variacao: "Preto / P",
@@ -33,9 +37,26 @@ const produtos = [
   },
 ];
 
+const motivosPorTipo = {
+  ENTRADA: [
+    { value: "REPOSICAO", label: "Reposição de estoque" },
+    { value: "COMPRA", label: "Compra" },
+    { value: "DEVOLUCAO", label: "Devolução" },
+  ],
+  SAIDA: [
+    { value: "VENDA", label: "Venda" },
+    { value: "PERDA", label: "Perda" },
+    { value: "RETIRADA_OPERACIONAL", label: "Retirada operacional" },
+  ],
+  AJUSTE: [
+    { value: "CORRECAO", label: "Correção de saldo" },
+    { value: "INVENTARIO", label: "Inventário" },
+  ],
+};
+
 let movimentacoes = [
   {
-    produto: "Camiseta",
+    produto: "Camiseta Básica",
     sku: "CAM-AMARELO-M",
     tipo: "ENTRADA",
     quantidade: 20,
@@ -57,13 +78,22 @@ let produtoSelecionado = null;
 document.addEventListener("DOMContentLoaded", () => {
   inicializarNavegacao();
   verificarStatusApi();
+  inicializarBuscaEstoque();
+  inicializarMovimentacao();
+
+  renderizarTudo();
+});
+
+function renderizarTudo() {
   renderizarDashboard();
   renderizarTabelaEstoque(produtos);
   renderizarHistorico();
   renderizarAlertas();
-  inicializarBuscaEstoque();
-  inicializarMovimentacao();
-});
+}
+
+/* =========================
+   Navegação
+========================= */
 
 function inicializarNavegacao() {
   const botoesMenu = document.querySelectorAll(".menu-button");
@@ -76,9 +106,7 @@ function inicializarNavegacao() {
       botoesMenu.forEach((item) => item.classList.remove("active"));
       botao.classList.add("active");
 
-      secoes.forEach((secao) => {
-        secao.classList.remove("active");
-      });
+      secoes.forEach((secao) => secao.classList.remove("active"));
 
       const secaoAtiva = document.getElementById(`page-${pagina}`);
 
@@ -94,9 +122,13 @@ function verificarStatusApi() {
 
   if (!apiStatus) return;
 
-  apiStatus.textContent = "API: Online";
+  apiStatus.textContent = "API: mock local";
   apiStatus.classList.add("status-online");
 }
+
+/* =========================
+   Renderizações
+========================= */
 
 function obterStatusProduto(produto) {
   if (produto.quantidade === 0) {
@@ -169,7 +201,11 @@ function renderizarDashboard() {
       (movimentacao) => `
         <tr>
           <td>${movimentacao.produto}</td>
-          <td><span class="badge ${movimentacao.tipo.toLowerCase()}">${formatarTipoMovimentacao(movimentacao.tipo)}</span></td>
+          <td>
+            <span class="badge ${movimentacao.tipo.toLowerCase()}">
+              ${formatarTipoMovimentacao(movimentacao.tipo)}
+            </span>
+          </td>
           <td>${movimentacao.quantidade}</td>
           <td>${movimentacao.data}</td>
         </tr>
@@ -203,282 +239,15 @@ function renderizarTabelaEstoque(listaProdutos) {
           <td>${produto.variacao}</td>
           <td>${produto.quantidade}</td>
           <td>${produto.estoqueMinimo}</td>
-          <td><span class="stock-status ${status.classe}">${status.texto}</span></td>
+          <td>
+            <span class="stock-status ${status.classe}">
+              ${status.texto}
+            </span>
+          </td>
         </tr>
       `;
     })
     .join("");
-}
-
-function inicializarBuscaEstoque() {
-  const inputBusca = document.getElementById("estoqueBusca");
-  const btnBuscar = document.getElementById("btnBuscarEstoque");
-
-  if (!inputBusca || !btnBuscar) return;
-
-  btnBuscar.addEventListener("click", () => {
-    buscarProdutosEstoque(inputBusca.value);
-  });
-
-  inputBusca.addEventListener("input", () => {
-    buscarProdutosEstoque(inputBusca.value);
-  });
-}
-
-function buscarProdutosEstoque(termo) {
-  const termoNormalizado = normalizarTexto(termo);
-
-  const resultado = produtos.filter((produto) => {
-    return (
-      normalizarTexto(produto.nome).includes(termoNormalizado) ||
-      normalizarTexto(produto.sku).includes(termoNormalizado) ||
-      normalizarTexto(produto.variacao).includes(termoNormalizado)
-    );
-  });
-
-  renderizarTabelaEstoque(resultado);
-}
-
-function inicializarMovimentacao() {
-  const btnBuscarProdutoMov = document.getElementById("btnBuscarProdutoMov");
-  const movBuscaProduto = document.getElementById("movBuscaProduto");
-  const tipoMovimentacao = document.getElementById("tipoMovimentacao");
-  const quantidadeMovimentacao = document.getElementById(
-    "quantidadeMovimentacao",
-  );
-  const motivoMovimentacao = document.getElementById("motivoMovimentacao");
-  const btnLimpar = document.getElementById("btnLimparMovimentacao");
-  const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
-
-  if (btnBuscarProdutoMov && movBuscaProduto) {
-    btnBuscarProdutoMov.addEventListener("click", () => {
-      selecionarProdutoParaMovimentacao(movBuscaProduto.value);
-    });
-
-    movBuscaProduto.addEventListener("keydown", (evento) => {
-      if (evento.key === "Enter") {
-        selecionarProdutoParaMovimentacao(movBuscaProduto.value);
-      }
-    });
-  }
-
-  [tipoMovimentacao, quantidadeMovimentacao, motivoMovimentacao].forEach(
-    (campo) => {
-      if (campo) {
-        campo.addEventListener("input", atualizarResumoMovimentacao);
-        campo.addEventListener("change", atualizarResumoMovimentacao);
-      }
-    },
-  );
-
-  if (btnLimpar) {
-    btnLimpar.addEventListener("click", limparMovimentacao);
-  }
-
-  if (btnConfirmar) {
-    btnConfirmar.addEventListener("click", confirmarMovimentacao);
-  }
-}
-
-function selecionarProdutoParaMovimentacao(termo) {
-  const produtoSelecionadoBox = document.getElementById("produtoSelecionado");
-  const termoNormalizado = normalizarTexto(termo);
-
-  if (!termoNormalizado) {
-    produtoSelecionado = null;
-
-    if (produtoSelecionadoBox) {
-      produtoSelecionadoBox.innerHTML = `
-        <span>Informe nome, código ou SKU para buscar um produto.</span>
-      `;
-    }
-
-    atualizarResumoMovimentacao();
-    return;
-  }
-
-  const produtoEncontrado = produtos.find((produto) => {
-    return (
-      normalizarTexto(produto.nome).includes(termoNormalizado) ||
-      normalizarTexto(produto.sku).includes(termoNormalizado) ||
-      normalizarTexto(produto.variacao).includes(termoNormalizado)
-    );
-  });
-
-  if (!produtoEncontrado) {
-    produtoSelecionado = null;
-
-    if (produtoSelecionadoBox) {
-      produtoSelecionadoBox.innerHTML = `
-        <span>Produto não encontrado.</span>
-      `;
-    }
-
-    atualizarResumoMovimentacao();
-    return;
-  }
-
-  produtoSelecionado = produtoEncontrado;
-
-  const status = obterStatusProduto(produtoSelecionado);
-
-  if (produtoSelecionadoBox) {
-    produtoSelecionadoBox.innerHTML = `
-      <strong>${produtoSelecionado.nome}</strong>
-      <span>${produtoSelecionado.sku} • ${produtoSelecionado.variacao}</span>
-      <span>Estoque atual: ${produtoSelecionado.quantidade} | Mínimo: ${produtoSelecionado.estoqueMinimo}</span>
-      <span class="stock-status ${status.classe}">${status.texto}</span>
-    `;
-  }
-
-  atualizarResumoMovimentacao();
-}
-
-function atualizarResumoMovimentacao() {
-  const resumoProduto = document.getElementById("resumoProduto");
-  const resumoTipo = document.getElementById("resumoTipo");
-  const resumoQuantidade = document.getElementById("resumoQuantidade");
-  const resumoMotivo = document.getElementById("resumoMotivo");
-  const resumoNovoEstoque = document.getElementById("resumoNovoEstoque");
-
-  const tipo = document.getElementById("tipoMovimentacao")?.value || "";
-  const quantidade = Number(
-    document.getElementById("quantidadeMovimentacao")?.value || 0,
-  );
-  const motivo = document.getElementById("motivoMovimentacao")?.value || "";
-
-  if (resumoProduto) {
-    resumoProduto.textContent = produtoSelecionado
-      ? `${produtoSelecionado.nome} - ${produtoSelecionado.variacao}`
-      : "—";
-  }
-
-  if (resumoTipo) {
-    resumoTipo.textContent = tipo ? formatarTipoMovimentacao(tipo) : "—";
-  }
-
-  if (resumoQuantidade) {
-    resumoQuantidade.textContent = quantidade;
-  }
-
-  if (resumoMotivo) {
-    resumoMotivo.textContent = motivo ? formatarMotivo(motivo) : "—";
-  }
-
-  if (resumoNovoEstoque) {
-    resumoNovoEstoque.textContent = calcularNovoEstoque(tipo, quantidade);
-  }
-}
-
-function calcularNovoEstoque(tipo, quantidade) {
-  if (!produtoSelecionado || !tipo || quantidade <= 0) {
-    return "—";
-  }
-
-  if (tipo === "ENTRADA") {
-    return produtoSelecionado.quantidade + quantidade;
-  }
-
-  if (tipo === "SAIDA") {
-    return produtoSelecionado.quantidade - quantidade;
-  }
-
-  if (tipo === "AJUSTE") {
-    return quantidade;
-  }
-
-  return "—";
-}
-
-function confirmarMovimentacao() {
-  const tipo = document.getElementById("tipoMovimentacao")?.value || "";
-  const quantidade = Number(
-    document.getElementById("quantidadeMovimentacao")?.value || 0,
-  );
-  const motivo = document.getElementById("motivoMovimentacao")?.value || "";
-
-  if (!produtoSelecionado) {
-    alert("Selecione um produto antes de confirmar a movimentação.");
-    return;
-  }
-
-  if (!tipo) {
-    alert("Selecione o tipo de movimentação.");
-    return;
-  }
-
-  if (!quantidade || quantidade <= 0) {
-    alert("Informe uma quantidade maior que zero.");
-    return;
-  }
-
-  if (!motivo) {
-    alert("Selecione o motivo da movimentação.");
-    return;
-  }
-
-  if (tipo === "SAIDA" && quantidade > produtoSelecionado.quantidade) {
-    alert("Saída não permitida: quantidade maior que o estoque disponível.");
-    return;
-  }
-
-  if (tipo === "ENTRADA") {
-    produtoSelecionado.quantidade += quantidade;
-  }
-
-  if (tipo === "SAIDA") {
-    produtoSelecionado.quantidade -= quantidade;
-  }
-
-  if (tipo === "AJUSTE") {
-    produtoSelecionado.quantidade = quantidade;
-  }
-
-  movimentacoes.unshift({
-    produto: produtoSelecionado.nome,
-    sku: produtoSelecionado.sku,
-    tipo,
-    quantidade,
-    motivo: formatarMotivo(motivo),
-    data: obterDataAtualFormatada(),
-  });
-
-  renderizarDashboard();
-  renderizarTabelaEstoque(produtos);
-  renderizarHistorico();
-  renderizarAlertas();
-  atualizarResumoMovimentacao();
-
-  alert("Movimentação registrada com sucesso.");
-}
-
-function limparMovimentacao() {
-  produtoSelecionado = null;
-
-  const campos = [
-    "movBuscaProduto",
-    "tipoMovimentacao",
-    "quantidadeMovimentacao",
-    "motivoMovimentacao",
-  ];
-
-  campos.forEach((id) => {
-    const campo = document.getElementById(id);
-
-    if (campo) {
-      campo.value = id === "quantidadeMovimentacao" ? "0" : "";
-    }
-  });
-
-  const produtoSelecionadoBox = document.getElementById("produtoSelecionado");
-
-  if (produtoSelecionadoBox) {
-    produtoSelecionadoBox.innerHTML = `
-      <span>Nenhum produto selecionado.</span>
-    `;
-  }
-
-  atualizarResumoMovimentacao();
 }
 
 function renderizarHistorico() {
@@ -508,7 +277,11 @@ function renderizarHistorico() {
         <tr>
           <td>${movimentacao.produto}</td>
           <td>${movimentacao.sku}</td>
-          <td><span class="badge ${movimentacao.tipo.toLowerCase()}">${formatarTipoMovimentacao(movimentacao.tipo)}</span></td>
+          <td>
+            <span class="badge ${movimentacao.tipo.toLowerCase()}">
+              ${formatarTipoMovimentacao(movimentacao.tipo)}
+            </span>
+          </td>
           <td>${movimentacao.quantidade}</td>
           <td>${movimentacao.motivo}</td>
           <td>${movimentacao.data}</td>
@@ -551,13 +324,545 @@ function renderizarAlertas() {
         <article class="alert-card">
           <strong>${produto.nome}</strong>
           <span>${produto.sku} • ${produto.variacao}</span>
-          <p>Estoque atual: ${produto.quantidade} | Estoque mínimo: ${produto.estoqueMinimo}</p>
-          <span class="stock-status ${status.classe}">${status.texto}</span>
+          <p>
+            Estoque atual: ${produto.quantidade} |
+            Estoque mínimo: ${produto.estoqueMinimo}
+          </p>
+          <span class="stock-status ${status.classe}">
+            ${status.texto}
+          </span>
         </article>
       `;
     })
     .join("");
 }
+
+/* =========================
+   Consulta de estoque
+========================= */
+
+function inicializarBuscaEstoque() {
+  const inputBusca = document.getElementById("estoqueBusca");
+  const btnBuscar = document.getElementById("btnBuscarEstoque");
+
+  if (!inputBusca || !btnBuscar) return;
+
+  btnBuscar.addEventListener("click", () => {
+    buscarProdutosEstoque(inputBusca.value);
+  });
+
+  inputBusca.addEventListener("input", () => {
+    buscarProdutosEstoque(inputBusca.value);
+  });
+}
+
+function buscarProdutosEstoque(termo) {
+  const termoNormalizado = normalizarTexto(termo);
+
+  const resultado = produtos.filter((produto) => {
+    return (
+      normalizarTexto(produto.nome).includes(termoNormalizado) ||
+      normalizarTexto(produto.sku).includes(termoNormalizado) ||
+      normalizarTexto(produto.variacao).includes(termoNormalizado)
+    );
+  });
+
+  renderizarTabelaEstoque(resultado);
+}
+
+/* =========================
+   Movimentação
+========================= */
+
+function inicializarMovimentacao() {
+  const btnBuscarProdutoMov = document.getElementById("btnBuscarProdutoMov");
+  const movBuscaProduto = document.getElementById("movBuscaProduto");
+  const tipoMovimentacao = document.getElementById("tipoMovimentacao");
+  const quantidadeMovimentacao = document.getElementById(
+    "quantidadeMovimentacao",
+  );
+  const motivoMovimentacao = document.getElementById("motivoMovimentacao");
+  const btnLimpar = document.getElementById("btnLimparMovimentacao");
+  const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
+
+  atualizarMotivosPorTipo("");
+
+  if (btnBuscarProdutoMov && movBuscaProduto) {
+    btnBuscarProdutoMov.addEventListener("click", () => {
+      selecionarProdutoParaMovimentacao(movBuscaProduto.value);
+    });
+
+    movBuscaProduto.addEventListener("keydown", (evento) => {
+      if (evento.key === "Enter") {
+        selecionarProdutoParaMovimentacao(movBuscaProduto.value);
+      }
+    });
+  }
+
+  if (tipoMovimentacao) {
+    tipoMovimentacao.addEventListener("change", () => {
+      atualizarMotivosPorTipo(tipoMovimentacao.value);
+      atualizarResumoMovimentacao();
+      limparFeedback();
+    });
+  }
+
+  [quantidadeMovimentacao, motivoMovimentacao].forEach((campo) => {
+    if (!campo) return;
+
+    campo.addEventListener("input", () => {
+      atualizarResumoMovimentacao();
+      limparFeedback();
+    });
+
+    campo.addEventListener("change", () => {
+      atualizarResumoMovimentacao();
+      limparFeedback();
+    });
+  });
+
+  if (btnLimpar) {
+    btnLimpar.addEventListener("click", limparMovimentacao);
+  }
+
+  if (btnConfirmar) {
+    btnConfirmar.addEventListener("click", confirmarMovimentacao);
+  }
+}
+
+function atualizarMotivosPorTipo(tipo) {
+  const motivoMovimentacao = document.getElementById("motivoMovimentacao");
+
+  if (!motivoMovimentacao) return;
+
+  if (!tipo) {
+    motivoMovimentacao.innerHTML = `
+      <option value="">Selecione o tipo primeiro...</option>
+    `;
+    motivoMovimentacao.disabled = true;
+    return;
+  }
+
+  const motivos = motivosPorTipo[tipo] || [];
+
+  motivoMovimentacao.disabled = false;
+
+  motivoMovimentacao.innerHTML = `
+    <option value="">Selecione...</option>
+    ${motivos
+      .map(
+        (motivo) => `
+          <option value="${motivo.value}">${motivo.label}</option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
+function selecionarProdutoParaMovimentacao(termo) {
+  const produtoSelecionadoBox = document.getElementById("produtoSelecionado");
+  const termoNormalizado = normalizarTexto(termo);
+
+  limparFeedback();
+
+  if (!termoNormalizado) {
+    produtoSelecionado = null;
+    renderizarProdutoSelecionado();
+    atualizarResumoMovimentacao();
+
+    exibirFeedback(
+      "Informe nome, código ou SKU para buscar um produto.",
+      "warning",
+    );
+    return;
+  }
+
+  const produtoEncontrado = encontrarProduto(termoNormalizado);
+
+  if (!produtoEncontrado) {
+    produtoSelecionado = null;
+    renderizarProdutoSelecionado();
+    atualizarResumoMovimentacao();
+
+    exibirFeedback("Produto não encontrado.", "warning");
+    return;
+  }
+
+  produtoSelecionado = produtoEncontrado;
+
+  if (produtoSelecionadoBox) {
+    renderizarProdutoSelecionado();
+  }
+
+  atualizarResumoMovimentacao();
+}
+
+function encontrarProduto(termoNormalizado) {
+  return (
+    produtos.find(
+      (produto) => normalizarTexto(produto.sku) === termoNormalizado,
+    ) ||
+    produtos.find((produto) =>
+      normalizarTexto(produto.sku).includes(termoNormalizado),
+    ) ||
+    produtos.find((produto) =>
+      normalizarTexto(produto.nome).includes(termoNormalizado),
+    ) ||
+    produtos.find((produto) =>
+      normalizarTexto(produto.variacao).includes(termoNormalizado),
+    )
+  );
+}
+
+function renderizarProdutoSelecionado() {
+  const produtoSelecionadoBox = document.getElementById("produtoSelecionado");
+
+  if (!produtoSelecionadoBox) return;
+
+  if (!produtoSelecionado) {
+    produtoSelecionadoBox.innerHTML = `
+      <span>Nenhum produto selecionado.</span>
+    `;
+    return;
+  }
+
+  const status = obterStatusProduto(produtoSelecionado);
+
+  produtoSelecionadoBox.innerHTML = `
+    <strong>${produtoSelecionado.nome}</strong>
+    <span>${produtoSelecionado.sku} • ${produtoSelecionado.variacao}</span>
+    <span>
+      Estoque atual: ${produtoSelecionado.quantidade} |
+      Mínimo: ${produtoSelecionado.estoqueMinimo}
+    </span>
+    <span class="stock-status ${status.classe}">
+      ${status.texto}
+    </span>
+  `;
+}
+
+function atualizarResumoMovimentacao() {
+  const resumoProduto = document.getElementById("resumoProduto");
+  const resumoTipo = document.getElementById("resumoTipo");
+  const resumoQuantidade = document.getElementById("resumoQuantidade");
+  const resumoMotivo = document.getElementById("resumoMotivo");
+  const resumoNovoEstoque = document.getElementById("resumoNovoEstoque");
+
+  const tipo = document.getElementById("tipoMovimentacao")?.value || "";
+  const quantidade = Number(
+    document.getElementById("quantidadeMovimentacao")?.value || 0,
+  );
+  const motivo = document.getElementById("motivoMovimentacao")?.value || "";
+
+  if (resumoProduto) {
+    resumoProduto.textContent = produtoSelecionado
+      ? `${produtoSelecionado.nome} - ${produtoSelecionado.variacao}`
+      : "—";
+  }
+
+  if (resumoTipo) {
+    resumoTipo.textContent = tipo ? formatarTipoMovimentacao(tipo) : "—";
+  }
+
+  if (resumoQuantidade) {
+    resumoQuantidade.textContent = quantidade;
+  }
+
+  if (resumoMotivo) {
+    resumoMotivo.textContent = motivo ? formatarMotivo(motivo) : "—";
+  }
+
+  if (resumoNovoEstoque) {
+    resumoNovoEstoque.textContent = calcularNovoEstoquePrevisto(
+      tipo,
+      quantidade,
+    );
+  }
+}
+
+function calcularNovoEstoquePrevisto(tipo, quantidade) {
+  if (!produtoSelecionado || !tipo || quantidade <= 0) {
+    return "—";
+  }
+
+  const estoqueAtual = Number(produtoSelecionado.quantidade);
+
+  if (tipo === "ENTRADA") {
+    return estoqueAtual + quantidade;
+  }
+
+  if (tipo === "SAIDA") {
+    return estoqueAtual - quantidade;
+  }
+
+  if (tipo === "AJUSTE") {
+    return quantidade;
+  }
+
+  return "—";
+}
+
+async function confirmarMovimentacao() {
+  const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
+
+  limparFeedback();
+
+  const validacao = validarFormularioMovimentacao();
+
+  if (!validacao.valido) {
+    exibirFeedback(validacao.mensagem, "warning");
+    return;
+  }
+
+  const payload = montarPayloadMovimentacao();
+
+  setBotaoConfirmarCarregando(true);
+
+  try {
+    const resposta = await registrarMovimentacaoMock(payload);
+
+    atualizarProdutoAposResposta(resposta);
+    registrarMovimentacaoNoHistorico(resposta);
+
+    renderizarTudo();
+    renderizarProdutoSelecionado();
+    atualizarResumoComEstoqueAtual(resposta.estoque.atual);
+
+    exibirFeedback(resposta.message, "success");
+  } catch (erro) {
+    exibirFeedback(
+      erro.message || "Não foi possível registrar a movimentação.",
+      "error",
+    );
+  } finally {
+    setBotaoConfirmarCarregando(false);
+
+    if (btnConfirmar) {
+      btnConfirmar.focus();
+    }
+  }
+}
+
+function validarFormularioMovimentacao() {
+  const tipo = document.getElementById("tipoMovimentacao")?.value || "";
+  const quantidade = Number(
+    document.getElementById("quantidadeMovimentacao")?.value || 0,
+  );
+  const motivo = document.getElementById("motivoMovimentacao")?.value || "";
+
+  if (!produtoSelecionado) {
+    return {
+      valido: false,
+      mensagem: "Selecione um produto antes de confirmar a movimentação.",
+    };
+  }
+
+  if (!tipo) {
+    return {
+      valido: false,
+      mensagem: "Selecione o tipo de movimentação.",
+    };
+  }
+
+  if (!quantidade || quantidade <= 0) {
+    return {
+      valido: false,
+      mensagem: "Informe uma quantidade maior que zero.",
+    };
+  }
+
+  if (!motivo) {
+    return {
+      valido: false,
+      mensagem: "Selecione o motivo da movimentação.",
+    };
+  }
+
+  return {
+    valido: true,
+  };
+}
+
+function montarPayloadMovimentacao() {
+  return {
+    id_variacao: produtoSelecionado.idVariacao,
+    tipo: document.getElementById("tipoMovimentacao")?.value || "",
+    quantidade: Number(
+      document.getElementById("quantidadeMovimentacao")?.value || 0,
+    ),
+    motivo: document.getElementById("motivoMovimentacao")?.value || "",
+  };
+}
+
+/*
+  Simulação temporária da API.
+  Depois será substituída por fetch("/estoque/movimentacoes").
+*/
+function registrarMovimentacaoMock(payload) {
+  return new Promise((resolve, reject) => {
+    window.setTimeout(() => {
+      const produto = produtos.find(
+        (item) => item.idVariacao === payload.id_variacao,
+      );
+
+      if (!produto) {
+        reject(new Error("Produto ou variação não encontrado."));
+        return;
+      }
+
+      const estoqueAnterior = Number(produto.quantidade);
+      let estoqueAtual = estoqueAnterior;
+
+      if (payload.tipo === "ENTRADA") {
+        estoqueAtual = estoqueAnterior + payload.quantidade;
+      }
+
+      if (payload.tipo === "SAIDA") {
+        if (payload.quantidade > estoqueAnterior) {
+          reject(
+            new Error(
+              "Saída não permitida: quantidade maior que o estoque disponível.",
+            ),
+          );
+          return;
+        }
+
+        estoqueAtual = estoqueAnterior - payload.quantidade;
+      }
+
+      if (payload.tipo === "AJUSTE") {
+        estoqueAtual = payload.quantidade;
+      }
+
+      resolve({
+        message: "Movimentação registrada com sucesso.",
+        movimentacao: {
+          tipo: payload.tipo,
+          quantidade: payload.quantidade,
+          motivo: payload.motivo,
+          data: obterDataAtualFormatada(),
+        },
+        estoque: {
+          anterior: estoqueAnterior,
+          atual: estoqueAtual,
+        },
+        produto: {
+          id_variacao: produto.idVariacao,
+          nome: produto.nome,
+          sku: produto.sku,
+          variacao: produto.variacao,
+        },
+      });
+    }, 300);
+  });
+}
+
+function atualizarProdutoAposResposta(resposta) {
+  const produto = produtos.find(
+    (item) => item.idVariacao === resposta.produto.id_variacao,
+  );
+
+  if (!produto) return;
+
+  produto.quantidade = resposta.estoque.atual;
+
+  if (
+    produtoSelecionado &&
+    produtoSelecionado.idVariacao === produto.idVariacao
+  ) {
+    produtoSelecionado = produto;
+  }
+}
+
+function registrarMovimentacaoNoHistorico(resposta) {
+  movimentacoes.unshift({
+    produto: resposta.produto.nome,
+    sku: resposta.produto.sku,
+    tipo: resposta.movimentacao.tipo,
+    quantidade: resposta.movimentacao.quantidade,
+    motivo: formatarMotivo(resposta.movimentacao.motivo),
+    data: resposta.movimentacao.data,
+  });
+}
+
+function atualizarResumoComEstoqueAtual(estoqueAtual) {
+  const resumoNovoEstoque = document.getElementById("resumoNovoEstoque");
+
+  if (!resumoNovoEstoque) return;
+
+  resumoNovoEstoque.textContent = estoqueAtual;
+}
+
+function setBotaoConfirmarCarregando(carregando) {
+  const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
+
+  if (!btnConfirmar) return;
+
+  btnConfirmar.disabled = carregando;
+  btnConfirmar.textContent = carregando
+    ? "Registrando..."
+    : "Confirmar movimentação";
+}
+
+function limparMovimentacao() {
+  produtoSelecionado = null;
+
+  const campos = [
+    "movBuscaProduto",
+    "tipoMovimentacao",
+    "quantidadeMovimentacao",
+    "motivoMovimentacao",
+  ];
+
+  campos.forEach((id) => {
+    const campo = document.getElementById(id);
+
+    if (campo) {
+      campo.value = id === "quantidadeMovimentacao" ? "0" : "";
+    }
+  });
+
+  atualizarMotivosPorTipo("");
+  renderizarProdutoSelecionado();
+  atualizarResumoMovimentacao();
+  limparFeedback();
+}
+
+/* =========================
+   Feedback
+========================= */
+
+function exibirFeedback(mensagem, tipo = "success") {
+  const feedbackMessage = document.getElementById("feedbackMessage");
+  const feedbackText = document.getElementById("feedbackText");
+
+  if (!feedbackMessage || !feedbackText) return;
+
+  feedbackMessage.className = `feedback-message show ${tipo}`;
+  feedbackText.textContent = mensagem;
+
+  window.clearTimeout(exibirFeedback.timeoutId);
+
+  exibirFeedback.timeoutId = window.setTimeout(() => {
+    limparFeedback();
+  }, 5000);
+}
+
+function limparFeedback() {
+  const feedbackMessage = document.getElementById("feedbackMessage");
+  const feedbackText = document.getElementById("feedbackText");
+
+  if (!feedbackMessage || !feedbackText) return;
+
+  feedbackMessage.className = "feedback-message";
+  feedbackText.textContent = "";
+
+  window.clearTimeout(exibirFeedback.timeoutId);
+}
+
+/* =========================
+   Formatadores
+========================= */
 
 function formatarTipoMovimentacao(tipo) {
   const tipos = {
@@ -573,11 +878,14 @@ function formatarMotivo(motivo) {
   const motivos = {
     REPOSICAO: "Reposição de estoque",
     COMPRA: "Compra",
-    VENDA: "Venda",
     DEVOLUCAO: "Devolução",
+    VENDA: "Venda",
     PERDA: "Perda",
+    RETIRADA_OPERACIONAL: "Retirada operacional",
     CORRECAO: "Correção de saldo",
+    INVENTARIO: "Inventário",
   };
+
   return motivos[motivo] || motivo;
 }
 
