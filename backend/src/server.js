@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 require("./db/database");
+const produtosRoutes = require("./routes/produtos.routes");
 
 const app = express();
 const PORT = 3001;
@@ -17,6 +18,8 @@ app.get("/", (req, res) => {
     status: "online",
   });
 });
+
+app.use("/produtos", produtosRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
