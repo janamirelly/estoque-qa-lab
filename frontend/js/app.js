@@ -1,41 +1,4 @@
-const produtos = [
-  {
-    id: 1,
-    idVariacao: 1,
-    nome: "Camiseta Básica",
-    sku: "CAM-AMARELO-M",
-    variacao: "Amarelo / M",
-    quantidade: 18,
-    estoqueMinimo: 10,
-  },
-  {
-    id: 2,
-    idVariacao: 2,
-    nome: "Camiseta Básica",
-    sku: "CAM-BRANCO-M",
-    variacao: "Branco / M",
-    quantidade: 7,
-    estoqueMinimo: 10,
-  },
-  {
-    id: 3,
-    idVariacao: 3,
-    nome: "Calça Jeans",
-    sku: "CAJ-AZUL-M",
-    variacao: "Azul / M",
-    quantidade: 0,
-    estoqueMinimo: 10,
-  },
-  {
-    id: 4,
-    idVariacao: 4,
-    nome: "Vestido Midi",
-    sku: "VES-PRETO-P",
-    variacao: "Preto / P",
-    quantidade: 12,
-    estoqueMinimo: 10,
-  },
-];
+const API_BASE_URL = "http://localhost:3001";
 
 const motivosPorTipo = {
   ENTRADA: [
@@ -54,41 +17,133 @@ const motivosPorTipo = {
   ],
 };
 
-let movimentacoes = [
-  {
-    produto: "Camiseta Básica",
-    sku: "CAM-AMARELO-M",
-    tipo: "ENTRADA",
-    quantidade: 20,
-    motivo: "Compra",
-    data: "2026-05-06 09:20",
-  },
-  {
-    produto: "Calça Jeans",
-    sku: "CAJ-AZUL-M",
-    tipo: "SAIDA",
-    quantidade: 3,
-    motivo: "Venda",
-    data: "2026-05-06 10:35",
-  },
-];
-
+let produtos = [];
+let movimentacoes = [];
 let produtoSelecionado = null;
+let movimentacaoConcluida = false;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   inicializarNavegacao();
-  verificarStatusApi();
   inicializarBuscaEstoque();
   inicializarMovimentacao();
+  inicializarModalResultado();
 
-  renderizarTudo();
+  await carregarDadosIniciais();
 });
+
+/* =========================
+   Inicialização
+========================= */
+
+async function carregarDadosIniciais() {
+  try {
+    atualizarStatusApi("verificando");
+
+    const [estoqueApi, movimentacoesApi] = await Promise.all([
+      buscarEstoqueApi(),
+      buscarMovimentacoesApi(),
+    ]);
+
+    produtos = estoqueApi.map(mapearProdutoApi);
+    movimentacoes = movimentacoesApi.map(mapearMovimentacaoApi);
+
+    renderizarTudo();
+    atualizarStatusApi("online");
+  } catch (erro) {
+    console.error("[FRONT] erro ao carregar dados iniciais:", erro);
+
+    produtos = [];
+    movimentacoes = [];
+
+    renderizarTudo();
+    atualizarStatusApi("offline");
+
+    exibirFeedback(
+      "Não foi possível carregar os dados da API. Verifique se o backend está rodando.",
+      "error",
+    );
+  }
+}
 
 function renderizarTudo() {
   renderizarDashboard();
   renderizarTabelaEstoque(produtos);
   renderizarHistorico();
   renderizarAlertas();
+}
+
+/* =========================
+   API
+========================= */
+
+async function buscarEstoqueApi() {
+  const resposta = await fetch(`${API_BASE_URL}/estoque`);
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao buscar estoque.");
+  }
+
+  return dados;
+}
+
+async function buscarMovimentacoesApi() {
+  const resposta = await fetch(`${API_BASE_URL}/estoque/movimentacoes`);
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao buscar movimentações.");
+  }
+
+  return dados;
+}
+
+async function registrarMovimentacaoApi(payload) {
+  const resposta = await fetch(`${API_BASE_URL}/estoque/movimentacoes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao registrar movimentação.");
+  }
+
+  return dados;
+}
+
+/* =========================
+   Mapeamento API → Front
+========================= */
+
+function mapearProdutoApi(item) {
+  return {
+    id: item.id_produto,
+    idVariacao: item.id_variacao,
+    nome: item.produto,
+    sku: item.sku,
+    variacao: `${item.cor} / ${item.tamanho}`,
+    cor: item.cor,
+    tamanho: item.tamanho,
+    quantidade: Number(item.quantidade),
+    estoqueMinimo: Number(item.estoque_min),
+    statusApi: item.status,
+  };
+}
+
+function mapearMovimentacaoApi(item) {
+  return {
+    produto: item.produto,
+    sku: item.sku,
+    tipo: item.tipo,
+    quantidade: Number(item.quantidade),
+    motivo: formatarMotivo(item.observacao),
+    data: formatarDataHoraParaTela(item.criado_em),
+  };
 }
 
 /* =========================
@@ -117,13 +172,27 @@ function inicializarNavegacao() {
   });
 }
 
-function verificarStatusApi() {
+function atualizarStatusApi(status) {
   const apiStatus = document.getElementById("apiStatus");
 
   if (!apiStatus) return;
 
-  apiStatus.textContent = "API: mock local";
-  apiStatus.classList.add("status-online");
+  apiStatus.classList.remove("status-online", "status-out", "status-warning");
+
+  if (status === "online") {
+    apiStatus.textContent = "API: online";
+    apiStatus.classList.add("status-online");
+    return;
+  }
+
+  if (status === "offline") {
+    apiStatus.textContent = "API: offline";
+    apiStatus.classList.add("status-out");
+    return;
+  }
+
+  apiStatus.textContent = "API: verificando...";
+  apiStatus.classList.add("status-warning");
 }
 
 /* =========================
@@ -257,7 +326,16 @@ function renderizarHistorico() {
   );
 
   if (btnAtualizarHistorico) {
-    btnAtualizarHistorico.onclick = renderizarHistorico;
+    btnAtualizarHistorico.onclick = async () => {
+      try {
+        const movimentacoesApi = await buscarMovimentacoesApi();
+        movimentacoes = movimentacoesApi.map(mapearMovimentacaoApi);
+        renderizarHistorico();
+        renderizarDashboard();
+      } catch (erro) {
+        exibirFeedback("Erro ao atualizar histórico.", "error");
+      }
+    };
   }
 
   if (!historicoTabela) return;
@@ -460,7 +538,6 @@ function atualizarMotivosPorTipo(tipo) {
 }
 
 function selecionarProdutoParaMovimentacao(termo) {
-  const produtoSelecionadoBox = document.getElementById("produtoSelecionado");
   const termoNormalizado = normalizarTexto(termo);
 
   limparFeedback();
@@ -490,10 +567,7 @@ function selecionarProdutoParaMovimentacao(termo) {
 
   produtoSelecionado = produtoEncontrado;
 
-  if (produtoSelecionadoBox) {
-    renderizarProdutoSelecionado();
-  }
-
+  renderizarProdutoSelecionado();
   atualizarResumoMovimentacao();
 }
 
@@ -602,10 +676,72 @@ function calcularNovoEstoquePrevisto(tipo, quantidade) {
   return "—";
 }
 
-async function confirmarMovimentacao() {
-  const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
+function inicializarModalResultado() {
+  const btnFechar = document.getElementById("btnFecharModalResultado");
+  const modal = document.getElementById("modalResultado");
 
+  if (btnFechar) {
+    btnFechar.addEventListener("click", fecharModalResultado);
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (evento) => {
+      if (evento.target === modal) {
+        fecharModalResultado();
+      }
+    });
+  }
+}
+
+function abrirModalResultado({ titulo, mensagem, detalhes = [] }) {
+  const modal = document.getElementById("modalResultado");
+  const modalTitulo = document.getElementById("modalResultadoTitulo");
+  const modalMensagem = document.getElementById("modalResultadoMensagem");
+  const modalDetalhes = document.getElementById("modalResultadoDetalhes");
+
+  if (!modal || !modalTitulo || !modalMensagem || !modalDetalhes) return;
+
+  modalTitulo.textContent = titulo;
+  modalMensagem.textContent = mensagem;
+
+  modalDetalhes.innerHTML = detalhes
+    .map(
+      (item) => `
+        <p>
+          <span>${item.label}</span>
+          <strong>${item.valor}</strong>
+        </p>
+      `,
+    )
+    .join("");
+
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function fecharModalResultado() {
+  const modal = document.getElementById("modalResultado");
+
+  if (!modal) return;
+
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+
+  limparMovimentacao();
+  movimentacaoConcluida = false;
+  setBotaoConfirmarCarregando(false);
+}
+
+async function confirmarMovimentacao() {
   limparFeedback();
+
+  if (movimentacaoConcluida) {
+    exibirFeedback(
+      "Esta movimentação já foi registrada. Clique em Limpar para iniciar uma nova operação.",
+      "warning",
+    );
+    return;
+  }
 
   const validacao = validarFormularioMovimentacao();
 
@@ -619,7 +755,7 @@ async function confirmarMovimentacao() {
   setBotaoConfirmarCarregando(true);
 
   try {
-    const resposta = await registrarMovimentacaoMock(payload);
+    const resposta = await registrarMovimentacaoApi(payload);
 
     atualizarProdutoAposResposta(resposta);
     registrarMovimentacaoNoHistorico(resposta);
@@ -628,18 +764,61 @@ async function confirmarMovimentacao() {
     renderizarProdutoSelecionado();
     atualizarResumoComEstoqueAtual(resposta.estoque.atual);
 
-    exibirFeedback(resposta.message, "success");
-  } catch (erro) {
-    exibirFeedback(
-      erro.message || "Não foi possível registrar a movimentação.",
-      "error",
-    );
-  } finally {
-    setBotaoConfirmarCarregando(false);
+    movimentacaoConcluida = true;
+
+    abrirModalResultado({
+      titulo: "Movimentação registrada com sucesso",
+      mensagem: resposta.message,
+      detalhes: [
+        {
+          label: "Produto",
+          valor: `${resposta.produto.nome} - ${resposta.produto.variacao}`,
+        },
+        {
+          label: "Tipo",
+          valor: formatarTipoMovimentacao(resposta.movimentacao.tipo),
+        },
+        {
+          label: "Quantidade",
+          valor: resposta.movimentacao.quantidade,
+        },
+        {
+          label: "Motivo",
+          valor:
+            resposta.movimentacao.motivo_descricao ||
+            formatarMotivo(resposta.movimentacao.motivo),
+        },
+        {
+          label: "Estoque anterior",
+          valor: resposta.estoque.anterior,
+        },
+        {
+          label: "Estoque atualizado",
+          valor: resposta.estoque.atual,
+        },
+      ],
+    });
+
+    const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
 
     if (btnConfirmar) {
-      btnConfirmar.focus();
+      btnConfirmar.disabled = true;
+      btnConfirmar.textContent = "Movimentação registrada";
     }
+  } catch (erro) {
+    abrirModalResultado({
+      titulo: "Movimentação não realizada",
+      mensagem:
+        erro.message || "Não foi possível registrar a movimentação de estoque.",
+      detalhes: [
+        {
+          label: "Status",
+          valor: "Erro",
+        },
+      ],
+    });
+
+    setBotaoConfirmarCarregando(false);
   }
 }
 
@@ -694,69 +873,6 @@ function montarPayloadMovimentacao() {
   };
 }
 
-/*
-  Simulação temporária da API.
-  Depois será substituída por fetch("/estoque/movimentacoes").
-*/
-function registrarMovimentacaoMock(payload) {
-  return new Promise((resolve, reject) => {
-    window.setTimeout(() => {
-      const produto = produtos.find(
-        (item) => item.idVariacao === payload.id_variacao,
-      );
-
-      if (!produto) {
-        reject(new Error("Produto ou variação não encontrado."));
-        return;
-      }
-
-      const estoqueAnterior = Number(produto.quantidade);
-      let estoqueAtual = estoqueAnterior;
-
-      if (payload.tipo === "ENTRADA") {
-        estoqueAtual = estoqueAnterior + payload.quantidade;
-      }
-
-      if (payload.tipo === "SAIDA") {
-        if (payload.quantidade > estoqueAnterior) {
-          reject(
-            new Error(
-              "Saída não permitida: quantidade maior que o estoque disponível.",
-            ),
-          );
-          return;
-        }
-
-        estoqueAtual = estoqueAnterior - payload.quantidade;
-      }
-
-      if (payload.tipo === "AJUSTE") {
-        estoqueAtual = payload.quantidade;
-      }
-
-      resolve({
-        message: "Movimentação registrada com sucesso.",
-        movimentacao: {
-          tipo: payload.tipo,
-          quantidade: payload.quantidade,
-          motivo: payload.motivo,
-          data: obterDataAtualFormatada(),
-        },
-        estoque: {
-          anterior: estoqueAnterior,
-          atual: estoqueAtual,
-        },
-        produto: {
-          id_variacao: produto.idVariacao,
-          nome: produto.nome,
-          sku: produto.sku,
-          variacao: produto.variacao,
-        },
-      });
-    }, 300);
-  });
-}
-
 function atualizarProdutoAposResposta(resposta) {
   const produto = produtos.find(
     (item) => item.idVariacao === resposta.produto.id_variacao,
@@ -780,8 +896,10 @@ function registrarMovimentacaoNoHistorico(resposta) {
     sku: resposta.produto.sku,
     tipo: resposta.movimentacao.tipo,
     quantidade: resposta.movimentacao.quantidade,
-    motivo: formatarMotivo(resposta.movimentacao.motivo),
-    data: resposta.movimentacao.data,
+    motivo:
+      resposta.movimentacao.motivo_descricao ||
+      formatarMotivo(resposta.movimentacao.motivo),
+    data: formatarDataHoraParaTela(resposta.movimentacao.data),
   });
 }
 
@@ -826,6 +944,9 @@ function limparMovimentacao() {
   renderizarProdutoSelecionado();
   atualizarResumoMovimentacao();
   limparFeedback();
+
+  movimentacaoConcluida = false;
+  setBotaoConfirmarCarregando(false);
 }
 
 /* =========================
@@ -886,7 +1007,34 @@ function formatarMotivo(motivo) {
     INVENTARIO: "Inventário",
   };
 
-  return motivos[motivo] || motivo;
+  return motivos[motivo] || motivo || "—";
+}
+
+function formatarDataHoraParaTela(dataHora) {
+  if (!dataHora) return "—";
+
+  if (dataHora.includes("T")) {
+    const data = new Date(dataHora);
+
+    if (Number.isNaN(data.getTime())) {
+      return dataHora;
+    }
+
+    return data.toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  }
+
+  const [data, hora] = dataHora.split(" ");
+
+  if (!data || !hora) return dataHora;
+
+  const [ano, mes, dia] = data.split("-");
+
+  if (!ano || !mes || !dia) return dataHora;
+
+  return `${dia}/${mes}/${ano} ${hora.slice(0, 5)}`;
 }
 
 function normalizarTexto(texto) {
@@ -895,16 +1043,4 @@ function normalizarTexto(texto) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
-}
-
-function obterDataAtualFormatada() {
-  const data = new Date();
-
-  const ano = data.getFullYear();
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  const dia = String(data.getDate()).padStart(2, "0");
-  const hora = String(data.getHours()).padStart(2, "0");
-  const minuto = String(data.getMinutes()).padStart(2, "0");
-
-  return `${ano}-${mes}-${dia} ${hora}:${minuto}`;
 }
