@@ -4,6 +4,7 @@ const cors = require("cors");
 require("./db/database");
 const produtosRoutes = require("./routes/produtos.routes");
 const estoqueRoutes = require("./routes/estoque.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 const app = express();
 const PORT = 3001;
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/produtos", produtosRoutes);
 app.use("/estoque", estoqueRoutes);
+app.use("/dashboard", dashboardRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
