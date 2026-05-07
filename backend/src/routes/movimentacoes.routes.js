@@ -9,7 +9,7 @@ const {
 // GET /movimentacoes
 router.get("/", listarMovimentacoes);
 
-// POST /movimentacoes
-router.post("/", registrarMovimentacao);
+// // POST /movimentacoes
+// router.post("/", registrarMovimentacao);
 
 module.exports = router;

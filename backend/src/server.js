@@ -5,7 +5,7 @@ require("./db/database");
 const produtosRoutes = require("./routes/produtos.routes");
 const estoqueRoutes = require("./routes/estoque.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
-const movimentacoesRoutes = require("./routes/movimentacoes.routes");
+// const movimentacoesRoutes = require("./routes/movimentacoes.routes");
 const variacoesRoutes = require("./routes/variacoes.routes");
 
 const app = express();
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 app.use("/produtos", produtosRoutes);
 app.use("/estoque", estoqueRoutes);
 app.use("/dashboard", dashboardRoutes);
-app.use("/movimentacoes", movimentacoesRoutes);
+// app.use("/movimentacoes", movimentacoesRoutes);
 app.use("/produtos", variacoesRoutes);
 
 app.use((req, res) => {
