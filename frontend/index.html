@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Estoque QA Lab</title>
+
+    <title>VarejoSync | Módulo de Estoque</title>
 
     <link rel="stylesheet" href="./css/app.css" />
   </head>
@@ -12,46 +13,378 @@
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <!-- <span class="brand-icon"</span> -->
           <div>
-            <h1>Estoque</h1>
-            <!-- <p>Controle de estoque para prática QA</p> -->
+            <h1>VarejoSync</h1>
+            <p>Módulo de Estoque</p>
           </div>
         </div>
 
-        <nav class="menu">
+        <nav class="menu" aria-label="Navegação principal">
           <button class="menu-button active" type="button" data-page="dashboard">
             Dashboard
           </button>
+
           <button class="menu-button" type="button" data-page="estoque">
             Consultar Estoque
           </button>
+
           <button class="menu-button" type="button" data-page="movimentacoes">
             Movimentações
           </button>
+
+          <button class="menu-button" type="button" data-page="historico">
+            Histórico
+          </button>
+
           <button class="menu-button" type="button" data-page="alertas">
             Alertas
           </button>
         </nav>
       </aside>
 
-      <main class="content">
-        <header class="page-header">
-          <div>
-            <h2 id="pageTitle">Dashboard</h2>
-            <p id="pageSubtitle">
-              Visão geral dos indicadores do estoque.
-            </p>
+      <div class="main-area">
+        <header class="topbar">
+          <div class="topbar-title">
+            <strong>VarejoSync</strong>
+            <span>Controle de estoque</span>
           </div>
 
-          <span class="api-status" id="apiStatus">API: verificando...</span>
+          <div class="topbar-actions">
+            <span class="topbar-badge">Ambiente: Desenvolvimento</span>
+            <span id="apiStatus" class="topbar-badge">API: verificando...</span>
+
+            <button id="themeToggle" class="theme-toggle" type="button">
+              Alternar tema
+            </button>
+          </div>
         </header>
 
-        <section id="appMain"></section>
-      </main>
+        <main class="content">
+          <section id="page-dashboard" class="page-section active">
+            <div class="page-header">
+              <div>
+                <h2>Dashboard de Estoque</h2>
+                <p>
+                  Acompanhe indicadores gerais, níveis de estoque e alertas
+                  operacionais do módulo.
+                </p>
+              </div>
+            </div>
+
+            <div class="dashboard-grid">
+              <article class="card metric-card">
+                <span class="metric-label">Produtos cadastrados</span>
+                <strong id="totalProdutos">0</strong>
+                <p>Total de produtos disponíveis para consulta.</p>
+              </article>
+
+              <article class="card metric-card">
+                <span class="metric-label">Estoque crítico</span>
+                <strong id="totalCriticos">0</strong>
+                <p>Itens abaixo do estoque mínimo definido.</p>
+              </article>
+
+              <article class="card metric-card">
+                <span class="metric-label">Itens esgotados</span>
+                <strong id="totalEsgotados">0</strong>
+                <p>Produtos sem quantidade disponível.</p>
+              </article>
+
+              <article class="card metric-card">
+                <span class="metric-label">Movimentações hoje</span>
+                <strong id="totalMovimentacoesHoje">0</strong>
+                <p>Entradas, saídas e ajustes registrados no dia.</p>
+              </article>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Últimas movimentações</h3>
+                  <p>Registros mais recentes realizados no estoque.</p>
+                </div>
+              </div>
+
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Tipo</th>
+                      <th>Quantidade</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardMovimentacoes">
+                    <tr>
+                      <td colspan="4" class="empty-row">
+                        Nenhuma movimentação carregada.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-estoque" class="page-section">
+            <div class="page-header">
+              <div>
+                <h2>Consultar Estoque</h2>
+                <p>
+                  Consulte produtos, variações, SKUs, quantidades disponíveis e
+                  situação atual do estoque.
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Produtos em estoque</h3>
+                  <p>Busque por nome, código, SKU ou variação.</p>
+                </div>
+
+                <div class="search-area">
+                  <input
+                    type="text"
+                    id="estoqueBusca"
+                    placeholder="Buscar produto..."
+                  />
+                  <button id="btnBuscarEstoque" class="button-primary" type="button">
+                    Buscar
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>SKU</th>
+                      <th>Variação</th>
+                      <th>Quantidade</th>
+                      <th>Estoque mínimo</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="estoqueTabela">
+                    <tr>
+                      <td colspan="6" class="empty-row">
+                        Nenhum produto carregado.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-movimentacoes" class="page-section">
+            <div class="page-header">
+              <div>
+                <h2>Movimentação de Estoque</h2>
+                <p>
+                  Registre entradas, saídas e ajustes de estoque de forma
+                  controlada.
+                </p>
+              </div>
+            </div>
+
+            <div class="card movimentacao-card">
+              <h3>Selecionar produto</h3>
+              <p class="section-helper">
+                Busque por nome, código ou SKU para iniciar a movimentação.
+              </p>
+
+              <div class="field field-busca">
+                <label for="movBuscaProduto">Buscar produto</label>
+
+                <div class="mov-busca-row">
+                  <input
+                    type="text"
+                    id="movBuscaProduto"
+                    placeholder="Busca por nome, código ou SKU"
+                  />
+
+                  <button id="btnBuscarProdutoMov" class="button-primary" type="button">
+                    Buscar
+                  </button>
+                </div>
+              </div>
+
+              <div id="produtoSelecionado" class="selected-product">
+                <span>Nenhum produto selecionado.</span>
+              </div>
+            </div>
+
+            <div class="card movimentacao-card">
+              <h3>Tipo de movimentação</h3>
+              <p class="section-helper">
+                Selecione a operação que será realizada no estoque.
+              </p>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="tipoMovimentacao">Tipo de movimentação</label>
+                  <select id="tipoMovimentacao">
+                    <option value="">Selecione...</option>
+                    <option value="ENTRADA">Entrada</option>
+                    <option value="SAIDA">Saída</option>
+                    <option value="AJUSTE">Ajuste</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="quantidadeMovimentacao">Quantidade</label>
+                  <input
+                    type="number"
+                    id="quantidadeMovimentacao"
+                    min="0"
+                    value="0"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="motivoMovimentacao">Motivo</label>
+                  <select id="motivoMovimentacao">
+                    <option value="">Selecione...</option>
+                    <option value="COMPRA">Compra</option>
+                    <option value="VENDA">Venda</option>
+                    <option value="DEVOLUCAO">Devolução</option>
+                    <option value="PERDA">Perda</option>
+                    <option value="CORRECAO">Correção de saldo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="card movimentacao-card">
+              <h3>Resumo da movimentação</h3>
+              <p class="section-helper">
+                Confira as informações antes de confirmar a operação.
+              </p>
+
+              <div class="summary-box">
+                <div class="summary-item">
+                  <span>Produto:</span>
+                  <strong id="resumoProduto">—</strong>
+                </div>
+
+                <div class="summary-item">
+                  <span>Tipo de movimentação:</span>
+                  <strong id="resumoTipo">—</strong>
+                </div>
+
+                <div class="summary-item">
+                  <span>Quantidade:</span>
+                  <strong id="resumoQuantidade">0</strong>
+                </div>
+
+                <div class="summary-item">
+                  <span>Motivo:</span>
+                  <strong id="resumoMotivo">—</strong>
+                </div>
+
+                <div class="summary-item">
+                  <span>Novo estoque previsto:</span>
+                  <strong id="resumoNovoEstoque">—</strong>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button id="btnLimparMovimentacao" class="button-secondary" type="button">
+                  Limpar
+                </button>
+
+                <button id="btnConfirmarMovimentacao" class="button-primary" type="button">
+                  Confirmar movimentação
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-historico" class="page-section">
+            <div class="page-header">
+              <div>
+                <h2>Histórico de Movimentações</h2>
+                <p>
+                  Consulte entradas, saídas, ajustes e registros realizados no
+                  estoque.
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Registros de estoque</h3>
+                  <p>Histórico operacional das movimentações realizadas.</p>
+                </div>
+
+                <button id="btnAtualizarHistorico" class="button-secondary" type="button">
+                  Atualizar
+                </button>
+              </div>
+
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>SKU</th>
+                      <th>Tipo</th>
+                      <th>Quantidade</th>
+                      <th>Motivo</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historicoTabela">
+                    <tr>
+                      <td colspan="6" class="empty-row">
+                        Nenhum registro carregado.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-alertas" class="page-section">
+            <div class="page-header">
+              <div>
+                <h2>Alertas de Estoque</h2>
+                <p>
+                  Acompanhe produtos esgotados, críticos ou abaixo do estoque
+                  mínimo.
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Itens com alerta</h3>
+                  <p>Produtos que exigem atenção operacional.</p>
+                </div>
+
+                <span id="alertasStatus" class="status-text">
+                  Aguardando consulta...
+                </span>
+              </div>
+
+              <div id="alertasLista" class="alertas-grid">
+                <div class="empty-state">Nenhum alerta carregado.</div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
 
-    <script src="./js/api.js"></script>
+    <script src="./js/theme.js"></script>
     <script src="./js/app.js"></script>
   </body>
 </html>
