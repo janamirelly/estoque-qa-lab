@@ -1,0 +1,109 @@
+.menu-button {
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) 14px;
+  text-align: left;
+  font-size: 15px;
+  color: var(--sidebar-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.menu-button:hover,
+.menu-button.active {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
+}
+
+.api-status {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.api-status.online {
+  color: var(--color-success);
+}
+
+.api-status.offline {
+  color: var(--color-danger);
+}
+
+.card,
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.card-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card-value {
+  margin: 10px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.table-card h3 {
+  margin: 0 0 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 600;
+  background: var(--surface-soft);
+}
+
+.empty-state {
+  padding: var(--space-6);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.entrada {
+  color: var(--color-success);
+  background: #dcfce7;
+}
+
+.badge.saida {
+  color: var(--color-danger);
+  background: #fee2e2;
+}
+
+.badge.ajuste {
+  color: var(--color-warning);
+  background: #fef3c7;
+}
