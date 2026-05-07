@@ -1,0 +1,21 @@
+# Node
+node_modules/
+
+# Banco SQLite
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+
+# Ambiente
+.env
+
+# VSCode
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
