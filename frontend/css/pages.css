@@ -201,3 +201,26 @@
   line-height: 1.4;
   color: var(--muted);
 }
+
+.filters-grid input,
+.filters-grid select {
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filters-grid input::placeholder {
+  color: var(--input-placeholder);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filters-grid .button-secondary {
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.filters-grid .input-icon {
+  font-size: 14px;
+}

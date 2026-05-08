@@ -82,6 +82,7 @@ textarea {
   border-radius: var(--radius-md);
   background: var(--input-bg);
   color: var(--text);
+  font-size: 15px;
   outline: none;
   transition:
     border-color var(--transition-fast),
