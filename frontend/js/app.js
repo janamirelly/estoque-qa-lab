@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   inicializarBuscaEstoque();
   inicializarMovimentacao();
   inicializarModalResultado();
+  inicializarFiltrosHistorico();
+  inicializarCadastroProduto();
 
   await carregarDadosIniciais();
 });
@@ -116,6 +118,24 @@ async function registrarMovimentacaoApi(payload) {
   return dados;
 }
 
+async function cadastrarProdutoApi(payload) {
+  const resposta = await fetch(`${API_BASE_URL}/produtos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao cadastrar produto.");
+  }
+
+  return dados;
+}
+
 /* =========================
    Mapeamento API → Front
 ========================= */
@@ -152,24 +172,31 @@ function mapearMovimentacaoApi(item) {
 
 function inicializarNavegacao() {
   const botoesMenu = document.querySelectorAll(".menu-button");
-  const secoes = document.querySelectorAll(".page-section");
 
   botoesMenu.forEach((botao) => {
     botao.addEventListener("click", () => {
-      const pagina = botao.dataset.page;
-
-      botoesMenu.forEach((item) => item.classList.remove("active"));
-      botao.classList.add("active");
-
-      secoes.forEach((secao) => secao.classList.remove("active"));
-
-      const secaoAtiva = document.getElementById(`page-${pagina}`);
-
-      if (secaoAtiva) {
-        secaoAtiva.classList.add("active");
-      }
+      navegarParaPagina(botao.dataset.page);
     });
   });
+}
+
+function navegarParaPagina(pagina) {
+  const botoesMenu = document.querySelectorAll(".menu-button");
+  const secoes = document.querySelectorAll(".page-section");
+
+  botoesMenu.forEach((botao) => {
+    botao.classList.toggle("active", botao.dataset.page === pagina);
+  });
+
+  secoes.forEach((secao) => {
+    secao.classList.remove("active");
+  });
+
+  const secaoAtiva = document.getElementById(`page-${pagina}`);
+
+  if (secaoAtiva) {
+    secaoAtiva.classList.add("active");
+  }
 }
 
 function atualizarStatusApi(status) {
@@ -234,9 +261,13 @@ function renderizarDashboard() {
   const totalMovimentacoesHoje = document.getElementById(
     "totalMovimentacoesHoje",
   );
+  const totalEntradasHoje = document.getElementById("totalEntradasHoje");
+  const totalSaidasHoje = document.getElementById("totalSaidasHoje");
+  const totalAjustesHoje = document.getElementById("totalAjustesHoje");
   const dashboardMovimentacoes = document.getElementById(
     "dashboardMovimentacoes",
   );
+  const btnVerHistorico = document.getElementById("btnVerHistorico");
 
   const criticos = produtos.filter(
     (produto) =>
@@ -245,11 +276,38 @@ function renderizarDashboard() {
 
   const esgotados = produtos.filter((produto) => produto.quantidade === 0);
 
+  const movimentacoesHoje = movimentacoes.filter((movimentacao) =>
+    movimentacaoEhDeHoje(movimentacao.data),
+  );
+
+  const entradasHoje = movimentacoesHoje.filter(
+    (movimentacao) => movimentacao.tipo === "ENTRADA",
+  );
+
+  const saidasHoje = movimentacoesHoje.filter(
+    (movimentacao) => movimentacao.tipo === "SAIDA",
+  );
+
+  const ajustesHoje = movimentacoesHoje.filter(
+    (movimentacao) => movimentacao.tipo === "AJUSTE",
+  );
+
   if (totalProdutos) totalProdutos.textContent = produtos.length;
   if (totalCriticos) totalCriticos.textContent = criticos.length;
   if (totalEsgotados) totalEsgotados.textContent = esgotados.length;
+
   if (totalMovimentacoesHoje) {
-    totalMovimentacoesHoje.textContent = movimentacoes.length;
+    totalMovimentacoesHoje.textContent = movimentacoesHoje.length;
+  }
+
+  if (totalEntradasHoje) totalEntradasHoje.textContent = entradasHoje.length;
+  if (totalSaidasHoje) totalSaidasHoje.textContent = saidasHoje.length;
+  if (totalAjustesHoje) totalAjustesHoje.textContent = ajustesHoje.length;
+
+  if (btnVerHistorico) {
+    btnVerHistorico.onclick = () => {
+      navegarParaPagina("historico");
+    };
   }
 
   if (!dashboardMovimentacoes) return;
@@ -259,7 +317,7 @@ function renderizarDashboard() {
   if (ultimasMovimentacoes.length === 0) {
     dashboardMovimentacoes.innerHTML = `
       <tr>
-        <td colspan="4" class="empty-row">Nenhuma movimentação carregada.</td>
+        <td colspan="5" class="empty-row">Nenhuma movimentação carregada.</td>
       </tr>
     `;
     return;
@@ -269,13 +327,24 @@ function renderizarDashboard() {
     .map(
       (movimentacao) => `
         <tr>
-          <td>${movimentacao.produto}</td>
+          <td>
+            <div class="table-product">
+              <strong>${movimentacao.produto}</strong>
+            </div>
+          </td>
+
+          <td>
+            <span class="sku-text">${movimentacao.sku}</span>
+          </td>
+
           <td>
             <span class="badge ${movimentacao.tipo.toLowerCase()}">
               ${formatarTipoMovimentacao(movimentacao.tipo)}
             </span>
           </td>
+
           <td>${movimentacao.quantidade}</td>
+
           <td>${movimentacao.data}</td>
         </tr>
       `,
@@ -330,8 +399,11 @@ function renderizarHistorico() {
       try {
         const movimentacoesApi = await buscarMovimentacoesApi();
         movimentacoes = movimentacoesApi.map(mapearMovimentacaoApi);
+
         renderizarHistorico();
         renderizarDashboard();
+
+        exibirFeedback("Histórico atualizado com sucesso.", "success");
       } catch (erro) {
         exibirFeedback("Erro ao atualizar histórico.", "error");
       }
@@ -340,26 +412,35 @@ function renderizarHistorico() {
 
   if (!historicoTabela) return;
 
-  if (movimentacoes.length === 0) {
+  const movimentacoesFiltradas = filtrarMovimentacoesHistorico();
+
+  if (movimentacoesFiltradas.length === 0) {
     historicoTabela.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Nenhum registro carregado.</td>
+        <td colspan="6" class="empty-row">
+          Nenhuma movimentação encontrada para os filtros aplicados.
+        </td>
       </tr>
     `;
     return;
   }
 
-  historicoTabela.innerHTML = movimentacoes
+  historicoTabela.innerHTML = movimentacoesFiltradas
     .map(
       (movimentacao) => `
         <tr>
           <td>${movimentacao.produto}</td>
-          <td>${movimentacao.sku}</td>
+
+          <td>
+            <span class="sku-text">${movimentacao.sku}</span>
+          </td>
+
           <td>
             <span class="badge ${movimentacao.tipo.toLowerCase()}">
               ${formatarTipoMovimentacao(movimentacao.tipo)}
             </span>
           </td>
+
           <td>${movimentacao.quantidade}</td>
           <td>${movimentacao.motivo}</td>
           <td>${movimentacao.data}</td>
@@ -367,6 +448,94 @@ function renderizarHistorico() {
       `,
     )
     .join("");
+}
+
+function filtrarMovimentacoesHistorico() {
+  const busca = normalizarTexto(
+    document.getElementById("historicoBusca")?.value || "",
+  );
+
+  const tipo = document.getElementById("historicoTipo")?.value || "";
+  const dataInicial =
+    document.getElementById("historicoDataInicial")?.value || "";
+  const dataFinal = document.getElementById("historicoDataFinal")?.value || "";
+
+  return movimentacoes.filter((movimentacao) => {
+    const correspondeBusca =
+      !busca ||
+      normalizarTexto(movimentacao.produto).includes(busca) ||
+      normalizarTexto(movimentacao.sku).includes(busca);
+
+    const correspondeTipo = !tipo || movimentacao.tipo === tipo;
+
+    const dataMovimentacao = obterDataISOParaFiltro(movimentacao.data);
+
+    const correspondeDataInicial =
+      !dataInicial || (dataMovimentacao && dataMovimentacao >= dataInicial);
+
+    const correspondeDataFinal =
+      !dataFinal || (dataMovimentacao && dataMovimentacao <= dataFinal);
+
+    return (
+      correspondeBusca &&
+      correspondeTipo &&
+      correspondeDataInicial &&
+      correspondeDataFinal
+    );
+  });
+}
+
+function obterDataISOParaFiltro(dataFormatada) {
+  if (!dataFormatada) return null;
+
+  // Formato esperado na tela: dd/mm/aaaa hh:mm
+  if (dataFormatada.includes("/")) {
+    const [data] = dataFormatada.split(" ");
+    const [dia, mes, ano] = data.split("/");
+
+    if (!dia || !mes || !ano) return null;
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  // Fallback para formato técnico: aaaa-mm-dd
+  if (dataFormatada.includes("-")) {
+    return dataFormatada.slice(0, 10);
+  }
+
+  return null;
+}
+function inicializarFiltrosHistorico() {
+  const historicoBusca = document.getElementById("historicoBusca");
+  const historicoTipo = document.getElementById("historicoTipo");
+  const historicoDataInicial = document.getElementById("historicoDataInicial");
+  const historicoDataFinal = document.getElementById("historicoDataFinal");
+  const btnLimparFiltros = document.getElementById("btnLimparFiltrosHistorico");
+
+  const camposFiltro = [
+    historicoBusca,
+    historicoTipo,
+    historicoDataInicial,
+    historicoDataFinal,
+  ];
+
+  camposFiltro.forEach((campo) => {
+    if (!campo) return;
+
+    campo.addEventListener("input", renderizarHistorico);
+    campo.addEventListener("change", renderizarHistorico);
+  });
+
+  if (btnLimparFiltros) {
+    btnLimparFiltros.addEventListener("click", () => {
+      if (historicoBusca) historicoBusca.value = "";
+      if (historicoTipo) historicoTipo.value = "";
+      if (historicoDataInicial) historicoDataInicial.value = "";
+      if (historicoDataFinal) historicoDataFinal.value = "";
+
+      renderizarHistorico();
+    });
+  }
 }
 
 function renderizarAlertas() {
@@ -446,6 +615,215 @@ function buscarProdutosEstoque(termo) {
   });
 
   renderizarTabelaEstoque(resultado);
+}
+
+/* =========================
+   Cadastro de produto
+========================= */
+
+function inicializarCadastroProduto() {
+  const btnCadastrarProduto = document.getElementById("btnCadastrarProduto");
+  const btnLimparProduto = document.getElementById("btnLimparProduto");
+  const produtoSku = document.getElementById("produtoSku");
+  const produtoCor = document.getElementById("produtoCor");
+  const produtoTamanho = document.getElementById("produtoTamanho");
+
+  if (produtoSku) {
+    produtoSku.addEventListener("input", () => {
+      produtoSku.value = produtoSku.value.toUpperCase();
+    });
+  }
+
+  if (produtoCor) {
+    produtoCor.addEventListener("input", () => {
+      produtoCor.value = produtoCor.value.toUpperCase();
+    });
+  }
+
+  if (produtoTamanho) {
+    produtoTamanho.addEventListener("input", () => {
+      produtoTamanho.value = produtoTamanho.value.toUpperCase();
+    });
+  }
+
+  if (btnCadastrarProduto) {
+    btnCadastrarProduto.addEventListener("click", cadastrarProduto);
+  }
+
+  if (btnLimparProduto) {
+    btnLimparProduto.addEventListener("click", limparFormularioProduto);
+  }
+}
+
+async function cadastrarProduto() {
+  limparFeedback();
+
+  const validacao = validarFormularioProduto();
+
+  if (!validacao.valido) {
+    exibirFeedback(validacao.mensagem, "warning");
+    return;
+  }
+
+  const payload = montarPayloadProduto();
+
+  setBotaoCadastrarProdutoCarregando(true);
+
+  try {
+    const resposta = await cadastrarProdutoApi(payload);
+
+    exibirFeedback(
+      resposta.message || "Produto cadastrado com sucesso.",
+      "success",
+    );
+
+    limparFormularioProduto();
+
+    await carregarDadosIniciais();
+
+    navegarParaPagina("estoque");
+  } catch (erro) {
+    exibirFeedback(
+      erro.message || "Não foi possível cadastrar o produto.",
+      "error",
+    );
+  } finally {
+    setBotaoCadastrarProdutoCarregando(false);
+  }
+}
+
+function validarFormularioProduto() {
+  const nome = document.getElementById("produtoNome")?.value.trim() || "";
+  const cor = document.getElementById("produtoCor")?.value.trim() || "";
+  const tamanho = document.getElementById("produtoTamanho")?.value.trim() || "";
+  const sku = document.getElementById("produtoSku")?.value.trim() || "";
+  const preco = Number(document.getElementById("produtoPreco")?.value || 0);
+  const quantidade = Number(
+    document.getElementById("produtoQuantidade")?.value || 0,
+  );
+  const estoqueMinimo = Number(
+    document.getElementById("produtoEstoqueMinimo")?.value || 0,
+  );
+
+  if (!nome) {
+    return {
+      valido: false,
+      mensagem: "Informe o nome do produto.",
+    };
+  }
+
+  if (!cor) {
+    return {
+      valido: false,
+      mensagem: "Informe a cor da variação.",
+    };
+  }
+
+  if (!tamanho) {
+    return {
+      valido: false,
+      mensagem: "Informe o tamanho da variação.",
+    };
+  }
+
+  if (!sku) {
+    return {
+      valido: false,
+      mensagem: "Informe o SKU da variação.",
+    };
+  }
+
+  if (preco < 0) {
+    return {
+      valido: false,
+      mensagem: "O preço não pode ser negativo.",
+    };
+  }
+
+  if (!Number.isInteger(quantidade) || quantidade < 0) {
+    return {
+      valido: false,
+      mensagem:
+        "A quantidade inicial deve ser um número inteiro maior ou igual a zero.",
+    };
+  }
+
+  if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 0) {
+    return {
+      valido: false,
+      mensagem:
+        "O estoque mínimo deve ser um número inteiro maior ou igual a zero.",
+    };
+  }
+
+  return {
+    valido: true,
+  };
+}
+
+function montarPayloadProduto() {
+  const nome = document.getElementById("produtoNome")?.value.trim() || "";
+  const cor = document.getElementById("produtoCor")?.value.trim() || "";
+  const tamanho = document.getElementById("produtoTamanho")?.value.trim() || "";
+  const sku = document.getElementById("produtoSku")?.value.trim() || "";
+  const preco = Number(document.getElementById("produtoPreco")?.value || 0);
+  const quantidade = Number(
+    document.getElementById("produtoQuantidade")?.value || 0,
+  );
+  const estoqueMinimo = Number(
+    document.getElementById("produtoEstoqueMinimo")?.value || 0,
+  );
+
+  return {
+    nome,
+    cor,
+    tamanho,
+    sku,
+    preco,
+    quantidade,
+    estoque_min: estoqueMinimo,
+  };
+}
+
+function limparFormularioProduto() {
+  const campos = [
+    "produtoNome",
+    "produtoCor",
+    "produtoTamanho",
+    "produtoSku",
+    "produtoPreco",
+    "produtoQuantidade",
+    "produtoEstoqueMinimo",
+  ];
+
+  campos.forEach((id) => {
+    const campo = document.getElementById(id);
+
+    if (!campo) return;
+
+    if (id === "produtoQuantidade") {
+      campo.value = "0";
+      return;
+    }
+
+    if (id === "produtoEstoqueMinimo") {
+      campo.value = "5";
+      return;
+    }
+
+    campo.value = "";
+  });
+}
+
+function setBotaoCadastrarProdutoCarregando(carregando) {
+  const btnCadastrarProduto = document.getElementById("btnCadastrarProduto");
+
+  if (!btnCadastrarProduto) return;
+
+  btnCadastrarProduto.disabled = carregando;
+  btnCadastrarProduto.textContent = carregando
+    ? "Cadastrando..."
+    : "Cadastrar produto";
 }
 
 /* =========================
@@ -1035,6 +1413,46 @@ function formatarDataHoraParaTela(dataHora) {
   if (!ano || !mes || !dia) return dataHora;
 
   return `${dia}/${mes}/${ano} ${hora.slice(0, 5)}`;
+}
+
+function formatarDataHoraParaTela(dataHora) {
+  if (!dataHora) return "—";
+
+  if (dataHora.includes("T")) {
+    const data = new Date(dataHora);
+
+    if (Number.isNaN(data.getTime())) {
+      return dataHora;
+    }
+
+    return data.toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  }
+
+  const [data, hora] = dataHora.split(" ");
+
+  if (!data || !hora) return dataHora;
+
+  const [ano, mes, dia] = data.split("-");
+
+  if (!ano || !mes || !dia) return dataHora;
+
+  return `${dia}/${mes}/${ano} ${hora.slice(0, 5)}`;
+}
+
+function movimentacaoEhDeHoje(dataMovimentacao) {
+  if (!dataMovimentacao) return false;
+
+  const hoje = new Date();
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const ano = hoje.getFullYear();
+
+  const dataHojeBR = `${dia}/${mes}/${ano}`;
+
+  return String(dataMovimentacao).startsWith(dataHojeBR);
 }
 
 function normalizarTexto(texto) {

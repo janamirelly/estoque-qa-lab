@@ -11,11 +11,23 @@ function all(sql, params = []) {
 
 function run(sql, params = []) {
   return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
+    db.run(sql, params, function callback(err) {
       if (err) return reject(err);
-      resolve(this);
+
+      resolve({
+        lastID: this.lastID,
+        changes: this.changes,
+      });
     });
   });
+}
+
+function normalizarTexto(valor) {
+  return String(valor || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 async function listarProdutos(req, res) {
@@ -36,41 +48,211 @@ async function listarProdutos(req, res) {
     console.error("[PRODUTOS] erro ao listar:", error.message);
 
     return res.status(500).json({
-      erro: "Erro ao listar produtos.",
+      message: "Erro ao listar produtos.",
     });
   }
 }
 
 async function criarProduto(req, res) {
-  try {
-    const nome = String(req.body.nome || "").trim();
-    const descricao = String(req.body.descricao || "").trim();
+  const nome = String(req.body.nome || "").trim();
+  const cor = String(req.body.cor || "").trim();
+  const tamanho = String(req.body.tamanho || "").trim();
+  const sku = String(req.body.sku || "")
+    .trim()
+    .toUpperCase();
+  const preco = Number(req.body.preco || 0);
+  const quantidade = Number(req.body.quantidade || 0);
+  const estoqueMin = Number(req.body.estoque_min ?? 5);
 
+  try {
     if (!nome) {
       return res.status(400).json({
-        erro: "Nome do produto é obrigatório.",
+        message: "Nome do produto é obrigatório.",
       });
     }
 
-    const result = await run(
+    if (!cor) {
+      return res.status(400).json({
+        message: "Cor da variação é obrigatória.",
+      });
+    }
+
+    if (!tamanho) {
+      return res.status(400).json({
+        message: "Tamanho da variação é obrigatório.",
+      });
+    }
+
+    if (!sku) {
+      return res.status(400).json({
+        message: "SKU da variação é obrigatório.",
+      });
+    }
+
+    if (Number.isNaN(preco) || preco < 0) {
+      return res.status(400).json({
+        message: "Preço deve ser um número maior ou igual a zero.",
+      });
+    }
+
+    if (!Number.isInteger(quantidade) || quantidade < 0) {
+      return res.status(400).json({
+        message:
+          "Quantidade inicial deve ser um número inteiro maior ou igual a zero.",
+      });
+    }
+
+    if (!Number.isInteger(estoqueMin) || estoqueMin < 0) {
+      return res.status(400).json({
+        message:
+          "Estoque mínimo deve ser um número inteiro maior ou igual a zero.",
+      });
+    }
+
+    const skuExistente = await all(
       `
-        INSERT INTO produto (nome, descricao, ativo)
-        VALUES (?, ?, 1)
+        SELECT id_variacao
+        FROM variacao_produto
+        WHERE sku = ?
       `,
-      [nome, descricao || null],
+      [sku],
     );
 
-    return res.status(201).json({
-      id_produto: result.lastID,
+    if (skuExistente.length > 0) {
+      return res.status(409).json({
+        message: "SKU já cadastrado para outra variação.",
+      });
+    }
+
+    const corNormalizada = normalizarTexto(cor);
+    const tamanhoNormalizado = normalizarTexto(tamanho);
+
+    await run("BEGIN TRANSACTION");
+
+    try {
+      const produtoCriado = await run(
+        `
+    INSERT INTO produto (
       nome,
-      descricao: descricao || null,
-      ativo: 1,
-    });
+      descricao,
+      ativo
+    )
+    VALUES (?, NULL, 1)
+  `,
+        [nome],
+      );
+
+      const variacaoCriada = await run(
+        `
+          INSERT INTO variacao_produto (
+            id_produto,
+            cor,
+            tamanho,
+            cor_normalizada,
+            tamanho_normalizado,
+            sku,
+            preco,
+            ativo
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+        `,
+        [
+          produtoCriado.lastID,
+          cor,
+          tamanho,
+          corNormalizada,
+          tamanhoNormalizado,
+          sku,
+          preco,
+        ],
+      );
+
+      await run(
+        `
+          INSERT INTO estoque (
+            id_variacao,
+            quantidade,
+            estoque_min,
+            atualizado_em
+          )
+          VALUES (?, ?, ?, datetime('now','localtime'))
+        `,
+        [variacaoCriada.lastID, quantidade, estoqueMin],
+      );
+
+      await run(
+        `
+          INSERT INTO auditoria (
+            acao,
+            recurso,
+            detalhes
+          )
+          VALUES (?, ?, ?)
+        `,
+        [
+          "PRODUTO_CRIADO",
+          `produto:${produtoCriado.lastID}`,
+          JSON.stringify({
+            id_produto: produtoCriado.lastID,
+            id_variacao: variacaoCriada.lastID,
+            nome,
+            sku,
+            quantidade,
+            estoque_min: estoqueMin,
+          }),
+        ],
+      );
+
+      await run("COMMIT");
+
+      return res.status(201).json({
+        message: "Produto cadastrado com sucesso.",
+        produto: {
+          id_produto: produtoCriado.lastID,
+          nome,
+          ativo: 1,
+        },
+        variacao: {
+          id_variacao: variacaoCriada.lastID,
+          cor,
+          tamanho,
+          sku,
+          preco,
+          ativo: 1,
+        },
+        estoque: {
+          quantidade,
+          estoque_min: estoqueMin,
+        },
+      });
+    } catch (error) {
+      await run("ROLLBACK");
+      throw error;
+    }
   } catch (error) {
     console.error("[PRODUTOS] erro ao criar:", error.message);
 
+    if (
+      error.message.includes("UNIQUE constraint failed: variacao_produto.sku")
+    ) {
+      return res.status(409).json({
+        message: "SKU já cadastrado para outra variação.",
+      });
+    }
+
+    if (
+      error.message.includes(
+        "UNIQUE constraint failed: variacao_produto.id_produto",
+      )
+    ) {
+      return res.status(409).json({
+        message:
+          "Produto já possui variação cadastrada com essa cor e tamanho.",
+      });
+    }
+
     return res.status(500).json({
-      erro: "Erro ao criar produto.",
+      message: "Erro ao criar produto.",
     });
   }
 }

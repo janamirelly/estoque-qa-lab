@@ -31,6 +31,9 @@
           <button class="menu-button" type="button" data-page="estoque">
             Consultar Estoque
           </button>
+          <button class="menu-button" type="button" data-page="produtos">
+            Cadastrar Produto
+          </button>
 
           <button class="menu-button" type="button" data-page="movimentacoes">
             Movimentações
@@ -77,35 +80,52 @@
               <div>
                 <h2>Dashboard de Estoque</h2>
                 <p>
-                  Acompanhe indicadores gerais, níveis de estoque e alertas
-                  operacionais do módulo.
+                  Acompanhe os principais indicadores de estoque, alertas
+                  operacionais e últimas movimentações registradas.
                 </p>
               </div>
             </div>
 
             <div class="dashboard-grid">
-              <article class="card metric-card">
-                <span class="metric-label">Produtos cadastrados</span>
-                <strong id="totalProdutos">0</strong>
-                <p>Total de produtos disponíveis para consulta.</p>
+              <article class="card metric-card metric-danger">
+                <span class="metric-label">Itens esgotados</span>
+                <strong id="totalEsgotados">0</strong>
+                <p>Produtos sem quantidade disponível em estoque.</p>
               </article>
 
-              <article class="card metric-card">
+              <article class="card metric-card metric-warning">
                 <span class="metric-label">Estoque crítico</span>
                 <strong id="totalCriticos">0</strong>
                 <p>Itens abaixo do estoque mínimo definido.</p>
               </article>
 
-              <article class="card metric-card">
-                <span class="metric-label">Itens esgotados</span>
-                <strong id="totalEsgotados">0</strong>
-                <p>Produtos sem quantidade disponível.</p>
-              </article>
-
-              <article class="card metric-card">
+              <article class="card metric-card metric-info">
                 <span class="metric-label">Movimentações hoje</span>
                 <strong id="totalMovimentacoesHoje">0</strong>
                 <p>Entradas, saídas e ajustes registrados no dia.</p>
+              </article>
+
+              <article class="card metric-card metric-neutral">
+                <span class="metric-label">Produtos cadastrados</span>
+                <strong id="totalProdutos">0</strong>
+                <p>Total de variações disponíveis para consulta.</p>
+              </article>
+            </div>
+
+            <div class="dashboard-mini-grid">
+              <article class="card mini-metric-card">
+                <span>Entradas hoje</span>
+                <strong id="totalEntradasHoje">0</strong>
+              </article>
+
+              <article class="card mini-metric-card">
+                <span>Saídas hoje</span>
+                <strong id="totalSaidasHoje">0</strong>
+              </article>
+
+              <article class="card mini-metric-card">
+                <span>Ajustes hoje</span>
+                <strong id="totalAjustesHoje">0</strong>
               </article>
             </div>
 
@@ -113,8 +133,19 @@
               <div class="table-header">
                 <div>
                   <h3>Últimas movimentações</h3>
-                  <p>Registros mais recentes realizados no estoque.</p>
+                  <p>
+                    Exibição resumida dos registros mais recentes. Para análise
+                    completa, acesse o histórico.
+                  </p>
                 </div>
+
+                <button
+                  id="btnVerHistorico"
+                  class="button-secondary"
+                  type="button"
+                >
+                  Ver histórico completo
+                </button>
               </div>
 
               <div class="table-wrapper">
@@ -122,14 +153,16 @@
                   <thead>
                     <tr>
                       <th>Produto</th>
+                      <th>SKU</th>
                       <th>Tipo</th>
                       <th>Quantidade</th>
                       <th>Data</th>
                     </tr>
                   </thead>
+
                   <tbody id="dashboardMovimentacoes">
                     <tr>
-                      <td colspan="4" class="empty-row">
+                      <td colspan="5" class="empty-row">
                         Nenhuma movimentação carregada.
                       </td>
                     </tr>
@@ -193,6 +226,109 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-produtos" class="page-section">
+            <div class="page-header">
+              <div>
+                <h2>Cadastrar Produto</h2>
+                <p>
+                  Cadastre produtos e variações para controle de estoque,
+                  consulta e movimentações operacionais.
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Dados do produto</h3>
+                  <p>
+                    Informe os dados principais do produto e da variação
+                    inicial.
+                  </p>
+                </div>
+              </div>
+
+              <div class="product-form-grid">
+                <div class="field">
+                  <label for="produtoNome">Nome do produto</label>
+                  <input
+                    type="text"
+                    id="produtoNome"
+                    placeholder="Ex: Camiseta Básica"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="produtoCor">Cor</label>
+                  <input type="text" id="produtoCor" placeholder="Ex: Preto" />
+                </div>
+
+                <div class="field">
+                  <label for="produtoTamanho">Tamanho</label>
+                  <input type="text" id="produtoTamanho" placeholder="Ex: G" />
+                </div>
+
+                <div class="field">
+                  <label for="produtoSku">SKU</label>
+                  <input
+                    type="text"
+                    id="produtoSku"
+                    placeholder="Ex: CAM-PRETO-G"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="produtoPreco">Preço</label>
+                  <input
+                    type="number"
+                    id="produtoPreco"
+                    min="0"
+                    step="0.01"
+                    placeholder="Ex: 99.90"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="produtoQuantidade">Quantidade inicial</label>
+                  <input
+                    type="number"
+                    id="produtoQuantidade"
+                    min="0"
+                    value="0"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="produtoEstoqueMinimo">Estoque mínimo</label>
+                  <input
+                    type="number"
+                    id="produtoEstoqueMinimo"
+                    min="0"
+                    value="5"
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  id="btnLimparProduto"
+                  class="button-secondary"
+                  type="button"
+                >
+                  Limpar
+                </button>
+
+                <button
+                  id="btnCadastrarProduto"
+                  class="button-primary"
+                  type="button"
+                >
+                  Cadastrar produto
+                </button>
               </div>
             </div>
           </section>
@@ -350,7 +486,10 @@
               <div class="table-header">
                 <div>
                   <h3>Registros de estoque</h3>
-                  <p>Histórico operacional das movimentações realizadas.</p>
+                  <p>
+                    Filtre movimentações por produto, SKU, tipo de operação ou
+                    período.
+                  </p>
                 </div>
 
                 <button
@@ -360,6 +499,47 @@
                 >
                   Atualizar
                 </button>
+              </div>
+
+              <div class="filters-grid">
+                <div class="field">
+                  <label for="historicoBusca">Buscar produto ou SKU</label>
+                  <input
+                    type="text"
+                    id="historicoBusca"
+                    placeholder="Ex: CAM-PRETO-G ou Camiseta"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="historicoTipo">Tipo</label>
+                  <select id="historicoTipo">
+                    <option value="">Todos</option>
+                    <option value="ENTRADA">Entrada</option>
+                    <option value="SAIDA">Saída</option>
+                    <option value="AJUSTE">Ajuste</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="historicoDataInicial">Data inicial</label>
+                  <input type="date" id="historicoDataInicial" />
+                </div>
+
+                <div class="field">
+                  <label for="historicoDataFinal">Data final</label>
+                  <input type="date" id="historicoDataFinal" />
+                </div>
+
+                <div class="filters-actions">
+                  <button
+                    id="btnLimparFiltrosHistorico"
+                    class="button-secondary"
+                    type="button"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
               </div>
 
               <div class="table-wrapper">
@@ -374,6 +554,7 @@
                       <th>Data</th>
                     </tr>
                   </thead>
+
                   <tbody id="historicoTabela">
                     <tr>
                       <td colspan="6" class="empty-row">
@@ -419,25 +600,29 @@
     </div>
 
     <div id="modalResultado" class="modal-overlay" aria-hidden="true">
-  <div
-    class="modal-card"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modalResultadoTitulo"
-  >
-    <h3 id="modalResultadoTitulo">Resultado da movimentação</h3>
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalResultadoTitulo"
+      >
+        <h3 id="modalResultadoTitulo">Resultado da movimentação</h3>
 
-    <p id="modalResultadoMensagem" class="modal-message"></p>
+        <p id="modalResultadoMensagem" class="modal-message"></p>
 
-    <div id="modalResultadoDetalhes" class="modal-details"></div>
+        <div id="modalResultadoDetalhes" class="modal-details"></div>
 
-    <div class="modal-actions">
-      <button id="btnFecharModalResultado" class="button-primary" type="button">
-        Entendi
-      </button>
+        <div class="modal-actions">
+          <button
+            id="btnFecharModalResultado"
+            class="button-primary"
+            type="button"
+          >
+            Entendi
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <script src="./js/theme.js"></script>
     <script src="./js/app.js"></script>
