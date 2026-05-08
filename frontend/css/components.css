@@ -658,3 +658,74 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 }
+
+.movimentacao-form-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) minmax(260px, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.movimentacao-form-grid .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.movimentacao-form-grid label {
+  min-height: 18px;
+  color: var(--muted-strong);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.movimentacao-form-grid input,
+.movimentacao-form-grid select {
+  width: 100%;
+  min-height: 48px;
+}
+
+#quantidadeMovimentacaoLabel {
+  color: var(--muted-strong);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quantity-context-hint {
+  display: block;
+  min-height: 34px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.summary-item #resumoQuantidadeLabel {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .movimentacao-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .movimentacao-form-grid .field:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .movimentacao-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .movimentacao-form-grid .field:last-child {
+    grid-column: auto;
+  }
+
+  .quantity-context-hint {
+    min-height: auto;
+  }
+}

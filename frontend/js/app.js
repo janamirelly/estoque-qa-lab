@@ -842,6 +842,7 @@ function inicializarMovimentacao() {
   const btnConfirmar = document.getElementById("btnConfirmarMovimentacao");
 
   atualizarMotivosPorTipo("");
+  atualizarLabelQuantidadePorTipo("");
 
   if (btnBuscarProdutoMov && movBuscaProduto) {
     btnBuscarProdutoMov.addEventListener("click", () => {
@@ -858,6 +859,7 @@ function inicializarMovimentacao() {
   if (tipoMovimentacao) {
     tipoMovimentacao.addEventListener("change", () => {
       atualizarMotivosPorTipo(tipoMovimentacao.value);
+      atualizarLabelQuantidadePorTipo(tipoMovimentacao.value);
       atualizarResumoMovimentacao();
       limparFeedback();
     });
@@ -1052,6 +1054,41 @@ function calcularNovoEstoquePrevisto(tipo, quantidade) {
   }
 
   return "—";
+}
+
+function atualizarLabelQuantidadePorTipo(tipo) {
+  const quantidadeLabel = document.getElementById(
+    "quantidadeMovimentacaoLabel",
+  );
+  const resumoQuantidadeLabel = document.getElementById(
+    "resumoQuantidadeLabel",
+  );
+
+  let label = "Quantidade";
+  let resumoLabel = "Quantidade:";
+
+  if (tipo === "ENTRADA") {
+    label = "Quantidade a adicionar";
+    resumoLabel = "Quantidade a adicionar:";
+  }
+
+  if (tipo === "SAIDA") {
+    label = "Quantidade a retirar";
+    resumoLabel = "Quantidade a retirar:";
+  }
+
+  if (tipo === "AJUSTE") {
+    label = "Novo saldo do estoque";
+    resumoLabel = "Novo saldo informado:";
+  }
+
+  if (quantidadeLabel) {
+    quantidadeLabel.textContent = label;
+  }
+
+  if (resumoQuantidadeLabel) {
+    resumoQuantidadeLabel.textContent = resumoLabel;
+  }
 }
 
 function inicializarModalResultado() {
@@ -1319,6 +1356,7 @@ function limparMovimentacao() {
   });
 
   atualizarMotivosPorTipo("");
+  atualizarLabelQuantidadePorTipo("");
   renderizarProdutoSelecionado();
   atualizarResumoMovimentacao();
   limparFeedback();

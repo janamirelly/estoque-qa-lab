@@ -381,7 +381,7 @@
                 Selecione a operação que será realizada no estoque.
               </p>
 
-              <div class="form-grid">
+              <div class="form-grid movimentacao-form-grid">
                 <div class="field">
                   <label for="tipoMovimentacao">Tipo de movimentação</label>
                   <select id="tipoMovimentacao">
@@ -393,13 +393,27 @@
                 </div>
 
                 <div class="field">
-                  <label for="quantidadeMovimentacao">Quantidade</label>
+                  <label
+                    id="quantidadeMovimentacaoLabel"
+                    for="quantidadeMovimentacao"
+                  >
+                    Quantidade
+                  </label>
+
                   <input
                     type="number"
                     id="quantidadeMovimentacao"
                     min="0"
                     value="0"
                   />
+
+                  <small
+                    id="quantidadeMovimentacaoHint"
+                    class="quantity-context-hint"
+                  >
+                    <!-- Informe a quantidade conforme o tipo de movimentação
+                    selecionado. -->
+                  </small>
                 </div>
 
                 <div class="field">
@@ -429,7 +443,7 @@
                 </div>
 
                 <div class="summary-item">
-                  <span>Quantidade:</span>
+                  <span id="resumoQuantidadeLabel">Quantidade:</span>
                   <strong id="resumoQuantidade">0</strong>
                 </div>
 
