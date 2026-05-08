@@ -376,11 +376,15 @@ tbody tr:last-child td {
 .stock-status {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   width: fit-content;
+  min-width: 82px;
+  padding: 6px 10px;
   border-radius: var(--radius-pill);
-  padding: 5px 10px;
   font-size: 12px;
   font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .status-ok,
@@ -776,4 +780,64 @@ tbody tr:last-child td {
 .search-area .input-with-icon,
 .mov-busca-row .input-with-icon {
   flex: 1;
+}
+
+/* =========================
+   Status de estoque
+========================= */
+
+
+
+/* Tema claro */
+[data-theme="light"] .stock-status.status-critical,
+:root .stock-status.status-critical {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+[data-theme="light"] .stock-status.status-warning,
+:root .stock-status.status-warning {
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+[data-theme="light"] .stock-status.status-out,
+:root .stock-status.status-out {
+  color: #991b1b;
+  background: #fecaca;
+  border: 1px solid #fca5a5;
+}
+
+[data-theme="light"] .stock-status.status-ok,
+:root .stock-status.status-ok {
+  color: #047857;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+}
+
+/* Tema escuro */
+[data-theme="dark"] .stock-status.status-critical {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.18);
+  border: 1px solid rgba(248, 113, 113, 0.24);
+}
+
+[data-theme="dark"] .stock-status.status-warning {
+  color: #fbbf24;
+  background: rgba(217, 119, 6, 0.18);
+  border: 1px solid rgba(251, 191, 36, 0.24);
+}
+
+[data-theme="dark"] .stock-status.status-out {
+  color: #fecaca;
+  background: rgba(185, 28, 28, 0.28);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+}
+
+[data-theme="dark"] .stock-status.status-ok {
+  color: #34d399;
+  background: rgba(5, 150, 105, 0.18);
+  border: 1px solid rgba(52, 211, 153, 0.24);
 }
