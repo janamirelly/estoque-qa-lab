@@ -22,6 +22,33 @@ let movimentacoes = [];
 let produtoSelecionado = null;
 let movimentacaoConcluida = false;
 
+const conteudoTopbarPorPagina = {
+  dashboard: {
+    titulo: "Dashboard de Estoque",
+    subtitulo: "Visão geral operacional do módulo",
+  },
+  estoque: {
+    titulo: "Consultar Estoque",
+    subtitulo: "Consulta de produtos, SKUs e saldos disponíveis",
+  },
+  produtos: {
+    titulo: "Cadastrar Produto",
+    subtitulo: "Cadastro de produtos, variações e estoque inicial",
+  },
+  movimentacoes: {
+    titulo: "Movimentações",
+    subtitulo: "Registro de entradas, saídas e ajustes de estoque",
+  },
+  historico: {
+    titulo: "Histórico",
+    subtitulo: "Consulta de movimentações registradas no estoque",
+  },
+  alertas: {
+    titulo: "Alertas",
+    subtitulo: "Acompanhamento de itens críticos e esgotados",
+  },
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   inicializarNavegacao();
   inicializarBuscaEstoque();
@@ -29,6 +56,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   inicializarModalResultado();
   inicializarFiltrosHistorico();
   inicializarCadastroProduto();
+
+  atualizarTopbarPagina("dashboard");
 
   await carregarDadosIniciais();
 });
@@ -197,6 +226,19 @@ function navegarParaPagina(pagina) {
   if (secaoAtiva) {
     secaoAtiva.classList.add("active");
   }
+
+  atualizarTopbarPagina(pagina);
+}
+
+function atualizarTopbarPagina(pagina) {
+  const topbarPageTitle = document.getElementById("topbarPageTitle");
+  const topbarPageSubtitle = document.getElementById("topbarPageSubtitle");
+  const conteudo = conteudoTopbarPorPagina[pagina];
+
+  if (!topbarPageTitle || !topbarPageSubtitle || !conteudo) return;
+
+  topbarPageTitle.textContent = conteudo.titulo;
+  topbarPageSubtitle.textContent = conteudo.subtitulo;
 }
 
 function atualizarStatusApi(status) {
@@ -405,6 +447,7 @@ function renderizarHistorico() {
 
         exibirFeedback("Histórico atualizado com sucesso.", "success");
       } catch (erro) {
+        console.error("[FRONT] erro ao atualizar histórico:", erro);
         exibirFeedback("Erro ao atualizar histórico.", "error");
       }
     };
@@ -505,6 +548,7 @@ function obterDataISOParaFiltro(dataFormatada) {
 
   return null;
 }
+
 function inicializarFiltrosHistorico() {
   const historicoBusca = document.getElementById("historicoBusca");
   const historicoTipo = document.getElementById("historicoTipo");
@@ -1424,33 +1468,6 @@ function formatarMotivo(motivo) {
   };
 
   return motivos[motivo] || motivo || "—";
-}
-
-function formatarDataHoraParaTela(dataHora) {
-  if (!dataHora) return "—";
-
-  if (dataHora.includes("T")) {
-    const data = new Date(dataHora);
-
-    if (Number.isNaN(data.getTime())) {
-      return dataHora;
-    }
-
-    return data.toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-  }
-
-  const [data, hora] = dataHora.split(" ");
-
-  if (!data || !hora) return dataHora;
-
-  const [ano, mes, dia] = data.split("-");
-
-  if (!ano || !mes || !dia) return dataHora;
-
-  return `${dia}/${mes}/${ano} ${hora.slice(0, 5)}`;
 }
 
 function formatarDataHoraParaTela(dataHora) {

@@ -1,39 +1,43 @@
 .menu-button {
   width: 100%;
+  min-height: 48px;
   border: 0;
   border-radius: var(--radius-md);
-  padding: 13px 18px;
-  text-align: left;
-  color: var(--sidebar-muted);
   background: transparent;
+  color: var(--sidebar-link);
+  font-family: var(--font-family);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
+  text-align: left;
+  padding: 0 var(--space-4);
   cursor: pointer;
   transition:
-    background-color var(--transition-fast),
+    background var(--transition-fast),
     color var(--transition-fast),
-    transform var(--transition-fast);
+    box-shadow var(--transition-fast);
 }
 
 .menu-button:hover {
   background: var(--sidebar-hover);
-  color: var(--sidebar-text);
+  color: var(--sidebar-link-hover);
 }
 
 .menu-button.active {
   position: relative;
   background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text);
+  color: var(--sidebar-link-active);
+  font-weight: 750;
 }
 .menu-button.active::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 10px;
-  bottom: 10px;
+  top: 50%;
   width: 4px;
+  height: 26px;
   border-radius: var(--radius-pill);
   background: var(--sidebar-active-border);
+  transform: translateY(-50%);
 }
 
 .theme-toggle,
@@ -785,8 +789,6 @@ tbody tr:last-child td {
 /* =========================
    Status de estoque
 ========================= */
-
-
 
 /* Tema claro */
 [data-theme="light"] .stock-status.status-critical,
