@@ -596,12 +596,34 @@
 
                 <div class="field">
                   <label for="historicoDataInicial">Data inicial</label>
-                  <input type="date" id="historicoDataInicial" />
+
+                  <div class="date-field">
+                    <input type="date" id="historicoDataInicial" />
+                    <button
+                      class="date-picker-button"
+                      type="button"
+                      data-date-target="historicoDataInicial"
+                      aria-label="Abrir calendário da data inicial"
+                    >
+                      📅
+                    </button>
+                  </div>
                 </div>
 
                 <div class="field">
                   <label for="historicoDataFinal">Data final</label>
-                  <input type="date" id="historicoDataFinal" />
+
+                  <div class="date-field">
+                    <input type="date" id="historicoDataFinal" />
+                    <button
+                      class="date-picker-button"
+                      type="button"
+                      data-date-target="historicoDataFinal"
+                      aria-label="Abrir calendário da data final"
+                    >
+                      📅
+                    </button>
+                  </div>
                 </div>
 
                 <div class="filters-actions">

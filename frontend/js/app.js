@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   inicializarModalResultado();
   inicializarFiltrosHistorico();
   inicializarCadastroProduto();
+  inicializarDatePickers();
 
   atualizarTopbarPagina("dashboard");
 
@@ -94,6 +95,27 @@ async function carregarDadosIniciais() {
       "error",
     );
   }
+}
+
+function inicializarDatePickers() {
+  const botoesCalendario = document.querySelectorAll(".date-picker-button");
+
+  botoesCalendario.forEach((botao) => {
+    botao.addEventListener("click", () => {
+      const targetId = botao.dataset.dateTarget;
+      const input = document.getElementById(targetId);
+
+      if (!input) return;
+
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+        return;
+      }
+
+      input.focus();
+      input.click();
+    });
+  });
 }
 
 function renderizarTudo() {

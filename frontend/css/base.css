@@ -101,3 +101,52 @@ textarea:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
 }
+
+.date-field {
+  position: relative;
+  width: 100%;
+}
+
+.date-field input[type="date"] {
+  width: 100%;
+  padding-right: 46px;
+}
+
+.date-picker-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.date-picker-button:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+[data-theme="dark"] .date-picker-button {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .date-picker-button:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none;
+}
