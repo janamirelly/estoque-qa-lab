@@ -129,12 +129,13 @@
   margin-bottom: var(--space-5);
 }
 
-.table-header h3,
-.card h3 {
+.card h3,
+.table-header h3 {
   color: var(--text);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 19px;
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
 }
 
 .table-header p {
@@ -216,8 +217,9 @@ tbody tr:last-child td {
 
 .field label {
   color: var(--muted-strong);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1.3;
 }
 
 .field input,
@@ -751,3 +753,4 @@ tbody tr:last-child td {
     min-height: auto;
   }
 }
+
