@@ -240,80 +240,123 @@
                 </p>
               </div>
             </div>
-
-            <div class="card">
+            <div class="card product-create-card">
               <div class="table-header">
                 <div>
-                  <h3>Dados do produto</h3>
+                  <h3>Novo produto</h3>
                   <p>
-                    Informe os dados principais do produto e da variação
-                    inicial.
+                    Cadastre o produto, sua primeira variação e o saldo inicial
+                    de estoque.
                   </p>
                 </div>
               </div>
 
-              <div class="product-form-grid">
-                <div class="field">
-                  <label for="produtoNome">Nome do produto</label>
-                  <input
-                    type="text"
-                    id="produtoNome"
-                    placeholder="Ex: Camiseta Básica"
-                  />
+              <div class="product-form-section">
+                <div class="form-section-title">
+                  <h4>Dados do produto</h4>
+                  <p>Informações principais usadas para identificar o item.</p>
                 </div>
 
-                <div class="field">
-                  <label for="produtoCor">Cor</label>
-                  <input type="text" id="produtoCor" placeholder="Ex: Preto" />
-                </div>
-
-                <div class="field">
-                  <label for="produtoTamanho">Tamanho</label>
-                  <input type="text" id="produtoTamanho" placeholder="Ex: G" />
-                </div>
-
-                <div class="field">
-                  <label for="produtoSku">SKU</label>
-                  <input
-                    type="text"
-                    id="produtoSku"
-                    placeholder="Ex: CAM-PRETO-G"
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="produtoPreco">Preço</label>
-                  <input
-                    type="number"
-                    id="produtoPreco"
-                    min="0"
-                    step="0.01"
-                    placeholder="Ex: 99.90"
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="produtoQuantidade">Quantidade inicial</label>
-                  <input
-                    type="number"
-                    id="produtoQuantidade"
-                    min="0"
-                    value="0"
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="produtoEstoqueMinimo">Estoque mínimo</label>
-                  <input
-                    type="number"
-                    id="produtoEstoqueMinimo"
-                    min="0"
-                    value="5"
-                  />
+                <div class="product-form-grid product-form-grid-single">
+                  <div class="field">
+                    <label for="produtoNome">Nome do produto</label>
+                    <input
+                      type="text"
+                      id="produtoNome"
+                      placeholder="Ex: Camiseta Básica"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div class="form-actions">
+              <div class="product-form-section">
+                <div class="form-section-title">
+                  <h4>Dados da variação</h4>
+                  <p>Defina cor, tamanho e SKU da variação inicial.</p>
+                </div>
+
+                <div class="product-form-grid product-form-grid-three">
+                  <div class="field">
+                    <label for="produtoCor">Cor</label>
+                    <input
+                      type="text"
+                      id="produtoCor"
+                      placeholder="Ex: Preto"
+                    />
+                    <small class="field-hint">
+                      Informe a cor comercial da variação.
+                    </small>
+                  </div>
+
+                  <div class="field">
+                    <label for="produtoTamanho">Tamanho</label>
+                    <input
+                      type="text"
+                      id="produtoTamanho"
+                      placeholder="Ex: G"
+                    />
+                    <small class="field-hint">
+                      Informe o tamanho da variação.
+                    </small>
+                  </div>
+
+                  <div class="field">
+                    <label for="produtoSku">SKU</label>
+                    <input
+                      type="text"
+                      id="produtoSku"
+                      placeholder="Ex: CAM-PRETO-G"
+                    />
+                    <small class="field-hint">
+                      Use um código único para identificar a variação.
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="product-form-section">
+                <div class="form-section-title">
+                  <h4>Preço e estoque</h4>
+                  <p>
+                    Informe o preço, saldo inicial e limite mínimo para alertas.
+                  </p>
+                </div>
+
+                <div class="product-form-grid product-form-grid-three">
+                  <div class="field">
+                    <label for="produtoPreco">Preço</label>
+                    <input
+                      type="number"
+                      id="produtoPreco"
+                      min="0"
+                      step="0.01"
+                      placeholder="Ex: 99.90"
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="produtoQuantidade">Quantidade inicial</label>
+                    <input
+                      type="number"
+                      id="produtoQuantidade"
+                      min="0"
+                      value="0"
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="produtoEstoqueMinimo">Estoque mínimo</label>
+                    <input
+                      type="number"
+                      id="produtoEstoqueMinimo"
+                      min="0"
+                      value="5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions product-form-actions">
                 <button
                   id="btnLimparProduto"
                   class="button-secondary"
@@ -351,7 +394,7 @@
               </p>
 
               <div class="field field-busca">
-                <label for="movBuscaProduto">Buscar produto</label>
+                <label for="movBuscaProduto"></label>
 
                 <div class="mov-busca-row">
                   <input

@@ -163,6 +163,8 @@
 
   .content {
     padding: var(--space-5);
+    min-width: 0;
+    overflow-x: hidden;
   }
 }
 
@@ -180,7 +182,8 @@
   }
 
   .page-header h2 {
-    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
   }
 
   .topbar-actions {

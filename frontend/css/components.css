@@ -1,14 +1,13 @@
 .menu-button {
   width: 100%;
-  min-height: 44px;
   border: 0;
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  padding: 13px 18px;
   text-align: left;
   color: var(--sidebar-muted);
   background: transparent;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition:
     background-color var(--transition-fast),
@@ -22,8 +21,19 @@
 }
 
 .menu-button.active {
-  background: var(--sidebar-active);
-  color: var(--sidebar-text);
+  position: relative;
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+}
+.menu-button.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--sidebar-active-border);
 }
 
 .theme-toggle,
@@ -165,6 +175,7 @@ th {
 
 td {
   color: var(--text);
+  vertical-align: middle;
 }
 
 tbody tr:last-child td {
@@ -289,10 +300,14 @@ tbody tr:last-child td {
 .badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  padding: 6px 10px;
   border-radius: var(--radius-pill);
-  padding: 5px 10px;
   font-size: 12px;
   font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .badge.entrada {
@@ -630,8 +645,11 @@ tbody tr:last-child td {
 
 .sku-text {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
   width: fit-content;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: var(--radius-pill);
   background: var(--surface-soft);
   color: var(--muted-strong);
@@ -639,6 +657,7 @@ tbody tr:last-child td {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 @media (max-width: 960px) {
@@ -661,7 +680,10 @@ tbody tr:last-child td {
 
 .movimentacao-form-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) minmax(
+      260px,
+      1fr
+    );
   gap: var(--space-4);
   align-items: start;
 }

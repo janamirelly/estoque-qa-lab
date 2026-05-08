@@ -1,6 +1,6 @@
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
@@ -48,7 +48,7 @@
 
 @media (max-width: 1200px) {
   .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -59,6 +59,11 @@
   }
 }
 
+@media (max-width: 720px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 640px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -67,10 +72,9 @@
 
 .filters-grid {
   display: grid;
-  grid-template-columns: minmax(240px, 2fr) minmax(160px, 1fr) minmax(
-      160px,
-      1fr
-    ) minmax(160px, 1fr) auto;
+  grid-template-columns:
+    minmax(240px, 2fr) minmax(160px, 1fr) minmax(160px, 1fr)
+    minmax(160px, 1fr) auto;
   gap: var(--space-4);
   align-items: end;
   margin-bottom: var(--space-5);
@@ -106,6 +110,80 @@
 
 @media (max-width: 640px) {
   .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.product-create-card {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.product-form-section {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.form-section-title {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.form-section-title h4 {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.form-section-title p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.product-form-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.product-form-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.product-form-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.product-form-grid-three .field {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-form-grid-three .field input {
+  min-height: 48px;
+}
+
+.field-hint {
+  display: block;
+  min-height: 18px;
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.product-form-actions {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 960px) {
+  .product-form-grid-three {
     grid-template-columns: 1fr;
   }
 }
