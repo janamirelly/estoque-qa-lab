@@ -767,9 +767,11 @@ function validarFormularioProduto() {
   const quantidade = Number(
     document.getElementById("produtoQuantidade")?.value || 0,
   );
-  const estoqueMinimo = Number(
-    document.getElementById("produtoEstoqueMinimo")?.value || 0,
-  );
+  const estoqueMinimoCampo =
+    document.getElementById("produtoEstoqueMinimo")?.value.trim() || "";
+
+  const estoqueMinimo =
+    estoqueMinimoCampo === "" ? 10 : Number(estoqueMinimoCampo);
 
   if (!nome) {
     return {
@@ -806,11 +808,11 @@ function validarFormularioProduto() {
     };
   }
 
-  if (!Number.isInteger(quantidade) || quantidade < 0) {
+  if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 10) {
     return {
       valido: false,
       mensagem:
-        "A quantidade inicial deve ser um número inteiro maior ou igual a zero.",
+        "O estoque mínimo deve ser um número inteiro maior ou igual a 10.",
     };
   }
 
@@ -836,9 +838,11 @@ function montarPayloadProduto() {
   const quantidade = Number(
     document.getElementById("produtoQuantidade")?.value || 0,
   );
-  const estoqueMinimo = Number(
-    document.getElementById("produtoEstoqueMinimo")?.value || 0,
-  );
+  const estoqueMinimoCampo =
+    document.getElementById("produtoEstoqueMinimo")?.value.trim() || "";
+
+  const estoqueMinimo =
+    estoqueMinimoCampo === "" ? 10 : Number(estoqueMinimoCampo);
 
   return {
     nome,
@@ -873,7 +877,7 @@ function limparFormularioProduto() {
     }
 
     if (id === "produtoEstoqueMinimo") {
-      campo.value = "5";
+      campo.value = "10";
       return;
     }
 
