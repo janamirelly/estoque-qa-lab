@@ -241,7 +241,7 @@ async function registrarMovimentacaoEstoque(req, res) {
           vp.tamanho,
           vp.sku,
           COALESCE(e.quantidade, 0) AS quantidade,
-          COALESCE(e.estoque_min, 5) AS estoque_min
+          COALESCE(e.estoque_min, 10) AS estoque_min
         FROM variacao_produto vp
         JOIN produto p
           ON p.id_produto = vp.id_produto

@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS estoque (
   id_estoque    INTEGER PRIMARY KEY AUTOINCREMENT,
   id_variacao   INTEGER NOT NULL UNIQUE,
   quantidade    INTEGER NOT NULL DEFAULT 0 CHECK (quantidade >= 0),
-  estoque_min   INTEGER NOT NULL DEFAULT 5 CHECK (estoque_min >= 0),
+  estoque_min   INTEGER NOT NULL DEFAULT 10 CHECK (estoque_min >= 0),
   atualizado_em TEXT NOT NULL DEFAULT (datetime('now','localtime')),
 
   FOREIGN KEY (id_variacao) REFERENCES variacao_produto(id_variacao)

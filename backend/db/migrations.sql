@@ -21,15 +21,15 @@ SELECT
   vp.ativo AS variacao_ativa,
 
   COALESCE(e.quantidade, 0) AS quantidade,
-  COALESCE(e.estoque_min, 5) AS estoque_min,
+  COALESCE(e.estoque_min, 10) AS estoque_min,
   e.atualizado_em,
 
   CASE
     WHEN COALESCE(e.quantidade, 0) <= 0
       THEN 'ESGOTADO'
-    WHEN COALESCE(e.quantidade, 0) <= CAST(COALESCE(e.estoque_min, 5) * 0.3 AS INTEGER)
+    WHEN COALESCE(e.quantidade, 0) <= CAST(COALESCE(e.estoque_min, 10) * 0.3 AS INTEGER)
       THEN 'CRITICO'
-    WHEN COALESCE(e.quantidade, 0) <= COALESCE(e.estoque_min, 5)
+    WHEN COALESCE(e.quantidade, 0) <= COALESCE(e.estoque_min, 10)
       THEN 'ATENCAO'
     ELSE 'DISPONIVEL'
   END AS status
