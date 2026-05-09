@@ -62,7 +62,14 @@ async function criarProduto(req, res) {
     .toUpperCase();
   const preco = Number(req.body.preco || 0);
   const quantidade = Number(req.body.quantidade || 0);
-  const estoqueMin = Number(req.body.estoque_min ?? 5);
+  const estoqueMinRaw = req.body.estoque_min;
+
+  const estoqueMin =
+    estoqueMinRaw === undefined ||
+    estoqueMinRaw === null ||
+    estoqueMinRaw === ""
+      ? null
+      : Number(estoqueMinRaw);
 
   try {
     if (!nome) {
@@ -89,9 +96,16 @@ async function criarProduto(req, res) {
       });
     }
 
-    if (Number.isNaN(preco) || preco < 0) {
+    if (estoqueMin === null) {
       return res.status(400).json({
-        message: "Preço deve ser um número maior ou igual a zero.",
+        message: "Estoque mínimo é obrigatório.",
+      });
+    }
+
+    if (!Number.isInteger(estoqueMin) || estoqueMin < 10) {
+      return res.status(400).json({
+        message:
+          "Estoque mínimo deve ser um número inteiro maior ou igual a 10.",
       });
     }
 

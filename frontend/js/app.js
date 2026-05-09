@@ -771,7 +771,7 @@ function validarFormularioProduto() {
     document.getElementById("produtoEstoqueMinimo")?.value.trim() || "";
 
   const estoqueMinimo =
-    estoqueMinimoCampo === "" ? 10 : Number(estoqueMinimoCampo);
+    estoqueMinimoCampo === "" ? null : Number(estoqueMinimoCampo);
 
   if (!nome) {
     return {
@@ -808,11 +808,10 @@ function validarFormularioProduto() {
     };
   }
 
-  if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 10) {
+  if (estoqueMinimo === null) {
     return {
       valido: false,
-      mensagem:
-        "O estoque mínimo deve ser um número inteiro maior ou igual a 10.",
+      mensagem: "Informe o estoque mínimo.",
     };
   }
 
@@ -842,7 +841,7 @@ function montarPayloadProduto() {
     document.getElementById("produtoEstoqueMinimo")?.value.trim() || "";
 
   const estoqueMinimo =
-    estoqueMinimoCampo === "" ? 10 : Number(estoqueMinimoCampo);
+    estoqueMinimoCampo === "" ? null : Number(estoqueMinimoCampo);
 
   return {
     nome,
