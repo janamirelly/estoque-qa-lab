@@ -763,7 +763,10 @@ function validarFormularioProduto() {
   const cor = document.getElementById("produtoCor")?.value.trim() || "";
   const tamanho = document.getElementById("produtoTamanho")?.value.trim() || "";
   const sku = document.getElementById("produtoSku")?.value.trim() || "";
-  const preco = Number(document.getElementById("produtoPreco")?.value || 0);
+  const precoCampo =
+    document.getElementById("produtoPreco")?.value.trim() || "";
+
+  const preco = precoCampo === "" ? null : Number(precoCampo);
   const quantidade = Number(
     document.getElementById("produtoQuantidade")?.value || 0,
   );
@@ -801,10 +804,12 @@ function validarFormularioProduto() {
     };
   }
 
-  if (preco < 0) {
+  const precoValido = /^\d+(\.\d{1,2})?$/.test(precoCampo);
+
+  if (preco === null || !precoValido || Number.isNaN(preco) || preco <= 0) {
     return {
       valido: false,
-      mensagem: "O preço não pode ser negativo.",
+      mensagem: "Informe um preço válido para a variação.",
     };
   }
 
@@ -833,7 +838,10 @@ function montarPayloadProduto() {
   const cor = document.getElementById("produtoCor")?.value.trim() || "";
   const tamanho = document.getElementById("produtoTamanho")?.value.trim() || "";
   const sku = document.getElementById("produtoSku")?.value.trim() || "";
-  const preco = Number(document.getElementById("produtoPreco")?.value || 0);
+  const precoCampo =
+    document.getElementById("produtoPreco")?.value.trim() || "";
+
+  const preco = precoCampo === "" ? null : Number(precoCampo);
   const quantidade = Number(
     document.getElementById("produtoQuantidade")?.value || 0,
   );

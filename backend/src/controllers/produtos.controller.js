@@ -60,7 +60,12 @@ async function criarProduto(req, res) {
   const sku = String(req.body.sku || "")
     .trim()
     .toUpperCase();
-  const preco = Number(req.body.preco || 0);
+  const precoRaw = req.body.preco;
+
+  const precoTexto =
+    precoRaw === undefined || precoRaw === null ? "" : String(precoRaw).trim();
+
+  const preco = Number(precoTexto);
   const quantidade = Number(req.body.quantidade || 0);
   const estoqueMinRaw = req.body.estoque_min;
 
@@ -93,6 +98,14 @@ async function criarProduto(req, res) {
     if (!sku) {
       return res.status(400).json({
         message: "SKU da variação é obrigatório.",
+      });
+    }
+
+    const precoValido = /^\d+(\.\d{1,2})?$/.test(precoTexto);
+
+    if (!precoTexto || !precoValido || Number.isNaN(preco) || preco <= 0) {
+      return res.status(400).json({
+        message: "Informe um preço válido para a variação.",
       });
     }
 
