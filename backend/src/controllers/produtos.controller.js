@@ -154,6 +154,35 @@ async function criarProduto(req, res) {
     const corNormalizada = normalizarTexto(cor);
     const tamanhoNormalizado = normalizarTexto(tamanho);
 
+    const produtosMesmoNome = await all(
+      `
+    SELECT
+      p.id_produto,
+      p.nome,
+      vp.id_variacao,
+      vp.cor_normalizada,
+      vp.tamanho_normalizado
+    FROM produto p
+    INNER JOIN variacao_produto vp
+      ON vp.id_produto = p.id_produto
+  `,
+    );
+
+    const variacaoDuplicada = produtosMesmoNome.find((item) => {
+      return (
+        normalizarTexto(item.nome) === normalizarTexto(nome) &&
+        item.cor_normalizada === corNormalizada &&
+        item.tamanho_normalizado === tamanhoNormalizado
+      );
+    });
+
+    if (variacaoDuplicada) {
+      return res.status(409).json({
+        message:
+          "Já existe uma variação cadastrada para este produto com a mesma cor e tamanho.",
+      });
+    }
+
     await run("BEGIN TRANSACTION");
 
     try {
@@ -274,7 +303,7 @@ async function criarProduto(req, res) {
     ) {
       return res.status(409).json({
         message:
-          "Produto já possui variação cadastrada com essa cor e tamanho.",
+          "Já existe uma variação cadastrada para este produto com a mesma cor e tamanho..",
       });
     }
 
