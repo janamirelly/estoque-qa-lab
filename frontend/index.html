@@ -662,7 +662,6 @@
               </div>
             </div>
           </section>
-
           <section id="page-alertas" class="page-section">
             <div class="page-header">
               <div>
@@ -671,6 +670,67 @@
                   Acompanhe produtos esgotados, críticos ou abaixo do estoque
                   mínimo.
                 </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-header">
+                <div>
+                  <h3>Filtros de alertas</h3>
+                  <p>
+                    Refine a consulta por status, produto, SKU, cor ou tamanho.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                class="filters-grid"
+                aria-label="Filtros de alertas de estoque"
+              >
+                <div class="field">
+                  <label for="alertaBusca">
+                    Buscar por produto, SKU, cor ou tamanho
+                  </label>
+                  <input
+                    type="text"
+                    id="alertaBusca"
+                    placeholder="Ex: Calça, CAL-AZUL-G, Preto, GG"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="alertaStatusFiltro">Status</label>
+                  <select id="alertaStatusFiltro">
+                    <option value="TODOS">Todos</option>
+                    <option value="ATENCAO">Atenção</option>
+                    <option value="CRITICO">Crítico</option>
+                    <option value="ESGOTADO">Esgotado</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="alertaCorFiltro">Cor</label>
+                  <select id="alertaCorFiltro">
+                    <option value="TODAS">Todas</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="alertaTamanhoFiltro">Tamanho</label>
+                  <select id="alertaTamanhoFiltro">
+                    <option value="TODOS">Todos</option>
+                  </select>
+                </div>
+
+                <div class="filters-actions">
+                  <button
+                    type="button"
+                    id="limparFiltrosAlertas"
+                    class="button-secondary"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
               </div>
             </div>
 

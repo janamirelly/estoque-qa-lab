@@ -21,6 +21,7 @@ let produtos = [];
 let movimentacoes = [];
 let produtoSelecionado = null;
 let movimentacaoConcluida = false;
+let filtrosAlertasInicializados = false;
 
 const conteudoTopbarPorPagina = {
   dashboard: {
@@ -79,7 +80,10 @@ async function carregarDadosIniciais() {
     produtos = estoqueApi.map(mapearProdutoApi);
     movimentacoes = movimentacoesApi.map(mapearMovimentacaoApi);
 
+    preencherFiltrosAlertas();
+    iniciarFiltrosAlertas();
     renderizarTudo();
+
     atualizarStatusApi("online");
   } catch (erro) {
     console.error("[FRONT] erro ao carregar dados iniciais:", erro);
@@ -604,32 +608,166 @@ function inicializarFiltrosHistorico() {
   }
 }
 
+function normalizarTexto(valor) {
+  return String(valor || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function obterStatusFiltroProduto(produto) {
+  const quantidade = Number(produto.quantidade);
+  const estoqueMinimo = Number(produto.estoqueMinimo);
+
+  if (quantidade === 0) {
+    return "ESGOTADO";
+  }
+
+  if (quantidade > 0 && quantidade < estoqueMinimo) {
+    return "CRITICO";
+  }
+
+  if (quantidade === estoqueMinimo) {
+    return "ATENCAO";
+  }
+
+  return "NORMAL";
+}
+
+function obterProdutosComAlerta() {
+  return produtos.filter((produto) => {
+    const status = obterStatusFiltroProduto(produto);
+    return ["ATENCAO", "CRITICO", "ESGOTADO"].includes(status);
+  });
+}
+
+function preencherFiltrosAlertas() {
+  const corFiltro = document.getElementById("alertaCorFiltro");
+  const tamanhoFiltro = document.getElementById("alertaTamanhoFiltro");
+
+  if (!corFiltro || !tamanhoFiltro) return;
+
+  const produtosComAlerta = obterProdutosComAlerta();
+
+  const cores = [
+    ...new Set(
+      produtosComAlerta
+        .map((produto) => produto.cor)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    ),
+  ];
+
+  const tamanhos = [
+    ...new Set(
+      produtosComAlerta
+        .map((produto) => produto.tamanho)
+        .filter(Boolean)
+        .sort((a, b) =>
+          String(a).localeCompare(String(b), "pt-BR", { numeric: true }),
+        ),
+    ),
+  ];
+
+  corFiltro.innerHTML = `
+    <option value="TODAS">Todas</option>
+    ${cores
+      .map(
+        (cor) => `
+          <option value="${cor}">${cor}</option>
+        `,
+      )
+      .join("")}
+  `;
+
+  tamanhoFiltro.innerHTML = `
+    <option value="TODOS">Todos</option>
+    ${tamanhos
+      .map(
+        (tamanho) => `
+          <option value="${tamanho}">${tamanho}</option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
+preencherFiltrosAlertas();
+iniciarFiltrosAlertas();
+renderizarAlertas();
+
+function filtrarAlertas(produtosComAlerta) {
+  const busca = normalizarTexto(document.getElementById("alertaBusca")?.value);
+  const statusSelecionado =
+    document.getElementById("alertaStatusFiltro")?.value || "TODOS";
+  const corSelecionada =
+    document.getElementById("alertaCorFiltro")?.value || "TODAS";
+  const tamanhoSelecionado =
+    document.getElementById("alertaTamanhoFiltro")?.value || "TODOS";
+
+  return produtosComAlerta.filter((produto) => {
+    const statusProduto = obterStatusFiltroProduto(produto);
+
+    const textoBusca = normalizarTexto(
+      [
+        produto.nome,
+        produto.sku,
+        produto.cor,
+        produto.tamanho,
+        produto.variacao,
+      ].join(" "),
+    );
+
+    const atendeBusca = !busca || textoBusca.includes(busca);
+
+    const atendeStatus =
+      statusSelecionado === "TODOS" || statusProduto === statusSelecionado;
+
+    const atendeCor =
+      corSelecionada === "TODAS" || produto.cor === corSelecionada;
+
+    const atendeTamanho =
+      tamanhoSelecionado === "TODOS" ||
+      String(produto.tamanho) === String(tamanhoSelecionado);
+
+    return atendeBusca && atendeStatus && atendeCor && atendeTamanho;
+  });
+}
+
 function renderizarAlertas() {
   const alertasLista = document.getElementById("alertasLista");
   const alertasStatus = document.getElementById("alertasStatus");
 
   if (!alertasLista) return;
 
-  const produtosComAlerta = produtos.filter(
-    (produto) =>
-      produto.quantidade === 0 || produto.quantidade <= produto.estoqueMinimo,
-  );
+  const produtosComAlerta = obterProdutosComAlerta();
+  const produtosFiltrados = filtrarAlertas(produtosComAlerta);
 
   if (alertasStatus) {
     alertasStatus.textContent =
-      produtosComAlerta.length > 0
-        ? `${produtosComAlerta.length} alerta(s) encontrado(s)`
+      produtosFiltrados.length > 0
+        ? `${produtosFiltrados.length} alerta(s) encontrado(s)`
         : "Nenhum alerta encontrado";
   }
 
   if (produtosComAlerta.length === 0) {
     alertasLista.innerHTML = `
-      <div class="empty-state">Nenhum produto em situação crítica.</div>
+      <div class="empty-state">Nenhum produto em situação de alerta.</div>
     `;
     return;
   }
 
-  alertasLista.innerHTML = produtosComAlerta
+  if (produtosFiltrados.length === 0) {
+    alertasLista.innerHTML = `
+      <div class="empty-state">
+        Nenhum alerta encontrado para os filtros selecionados.
+      </div>
+    `;
+    return;
+  }
+
+  alertasLista.innerHTML = produtosFiltrados
     .map((produto) => {
       const status = obterStatusProduto(produto);
 
@@ -648,6 +786,34 @@ function renderizarAlertas() {
       `;
     })
     .join("");
+}
+
+function iniciarFiltrosAlertas() {
+  if (filtrosAlertasInicializados) return;
+
+  const busca = document.getElementById("alertaBusca");
+  const status = document.getElementById("alertaStatusFiltro");
+  const cor = document.getElementById("alertaCorFiltro");
+  const tamanho = document.getElementById("alertaTamanhoFiltro");
+  const limpar = document.getElementById("limparFiltrosAlertas");
+
+  if (!busca || !status || !cor || !tamanho || !limpar) return;
+
+  busca.addEventListener("input", renderizarAlertas);
+  status.addEventListener("change", renderizarAlertas);
+  cor.addEventListener("change", renderizarAlertas);
+  tamanho.addEventListener("change", renderizarAlertas);
+
+  limpar.addEventListener("click", () => {
+    busca.value = "";
+    status.value = "TODOS";
+    cor.value = "TODAS";
+    tamanho.value = "TODOS";
+
+    renderizarAlertas();
+  });
+
+  filtrosAlertasInicializados = true;
 }
 
 /* =========================
@@ -1543,10 +1709,3 @@ function movimentacaoEhDeHoje(dataMovimentacao) {
   return String(dataMovimentacao).startsWith(dataHojeBR);
 }
 
-function normalizarTexto(texto) {
-  return String(texto)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
