@@ -188,13 +188,13 @@
     grid-template-columns: 1fr;
   }
 }
-.section-heading {
+.movimentacao-section-heading {
   display: grid;
   gap: 6px;
   margin-bottom: 20px;
 }
 
-.section-heading p,
+.movimentacao-section-heading p,
 .card > p,
 .table-header p {
   font-size: 13px;
