@@ -127,10 +127,15 @@
 
 .table-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-5);
+}
+
+.table-header .button-secondary {
+  width: auto;
+  white-space: nowrap;
 }
 
 .card h3,
@@ -181,6 +186,15 @@ th {
 td {
   color: var(--text);
   vertical-align: middle;
+}
+
+td .sku-text {
+  vertical-align: middle;
+}
+
+table:not(:has(#dashboardMovimentacoes)) th:nth-child(2),
+table:not(:has(#dashboardMovimentacoes)) td:nth-child(2) {
+  width: 180px;
 }
 
 tbody tr:last-child td {
@@ -657,17 +671,24 @@ tbody tr:last-child td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 112px;
-  width: fit-content;
-  padding: 6px 10px;
+
+  width: 150px;
+  min-height: 30px;
+  padding: 0 12px;
+
   border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
   background: var(--surface-soft);
   color: var(--muted-strong);
-  border: 1px solid var(--border);
+
   font-size: 12px;
   font-weight: 800;
+  line-height: 1;
   letter-spacing: 0.02em;
   white-space: nowrap;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 960px) {
@@ -844,5 +865,133 @@ tbody tr:last-child td {
   border: 1px solid rgba(52, 211, 153, 0.24);
 }
 
+/* =========================================================
+   DASHBOARD — ÚLTIMAS MOVIMENTAÇÕES
+   Ajuste específico de composição desktop
+========================================================= */
 
+#page-dashboard .card:has(#dashboardMovimentacoes) {
+  padding: 24px;
+}
 
+/* Header do card: título, descrição e botão em coluna */
+#page-dashboard .card:has(#dashboardMovimentacoes) .table-header {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  justify-content: start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Limita a largura do texto para não ficar espalhado */
+#page-dashboard .card:has(#dashboardMovimentacoes) .table-header > div {
+  max-width: 720px;
+}
+
+/* Título */
+#page-dashboard .card:has(#dashboardMovimentacoes) .table-header h3 {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Descrição */
+#page-dashboard .card:has(#dashboardMovimentacoes) .table-header p {
+  max-width: 720px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Botão do histórico: ação secundária, alinhada ao bloco */
+#page-dashboard .card:has(#dashboardMovimentacoes) .table-header .button-secondary {
+  width: fit-content;
+  min-width: 220px;
+  height: 42px;
+  padding: 0 18px;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+/* Wrapper da tabela */
+#page-dashboard .table-wrapper:has(#dashboardMovimentacoes) {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0;
+  overflow-x: visible;
+  border-radius: var(--radius-md);
+}
+
+/* Tabela do dashboard */
+#page-dashboard table:has(#dashboardMovimentacoes) {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* Cabeçalho e células */
+#page-dashboard table:has(#dashboardMovimentacoes) th,
+#page-dashboard table:has(#dashboardMovimentacoes) td {
+  height: 58px;
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+/* Produto */
+#page-dashboard table:has(#dashboardMovimentacoes) th:nth-child(1),
+#page-dashboard table:has(#dashboardMovimentacoes) td:nth-child(1) {
+  width: 26%;
+  text-align: left;
+}
+
+/* SKU */
+#page-dashboard table:has(#dashboardMovimentacoes) th:nth-child(2),
+#page-dashboard table:has(#dashboardMovimentacoes) td:nth-child(2) {
+  width: 22%;
+  text-align: left;
+}
+
+/* Tipo */
+#page-dashboard table:has(#dashboardMovimentacoes) th:nth-child(3),
+#page-dashboard table:has(#dashboardMovimentacoes) td:nth-child(3) {
+  width: 16%;
+  text-align: left;
+}
+
+/* Quantidade */
+#page-dashboard table:has(#dashboardMovimentacoes) th:nth-child(4),
+#page-dashboard table:has(#dashboardMovimentacoes) td:nth-child(4) {
+  width: 14%;
+  text-align: center;
+}
+
+/* Data */
+#page-dashboard table:has(#dashboardMovimentacoes) th:nth-child(5),
+#page-dashboard table:has(#dashboardMovimentacoes) td:nth-child(5) {
+  width: 22%;
+  text-align: right;
+}
+
+/* Produto dentro da tabela */
+#dashboardMovimentacoes .table-product strong {
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+/* SKU */
+#dashboardMovimentacoes .sku-text {
+  width: 156px;
+  min-height: 30px;
+  padding: 0 12px;
+  justify-content: center;
+}
+
+/* Tipo */
+#dashboardMovimentacoes .badge {
+  min-width: 86px;
+  min-height: 28px;
+  padding: 0 12px;
+  justify-content: center;
+}

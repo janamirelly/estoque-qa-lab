@@ -11,7 +11,27 @@
 
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <h1>
+            <span class="brand-main">Varejo</span
+            ><span class="brand-accent">Sync</span>
+          </h1>
+          <p>Módulo de Estoque</p>
+        </div>
+
+        <button
+          id="mobileMenuToggle"
+          class="mobile-menu-toggle"
+          type="button"
+          aria-label="Abrir menu de navegação"
+          aria-expanded="false"
+        >
+          ☰
+        </button>
+      </header>
+
+      <aside class="sidebar" id="sidebar">
         <div class="brand">
           <div>
             <h1>
@@ -57,9 +77,9 @@
         <header class="topbar">
           <div class="topbar-title">
             <strong id="topbarPageTitle">Controle de Estoque</strong>
-            <span id="topbarPageSubtitle"
-              >Visão geral operacional do módulo</span
-            >
+            <span id="topbarPageSubtitle">
+              Visão geral operacional do módulo
+            </span>
           </div>
 
           <div class="topbar-actions">
@@ -67,7 +87,7 @@
             <span id="apiStatus" class="topbar-badge">API: verificando...</span>
 
             <button id="themeToggle" class="theme-toggle" type="button">
-              Alternar tema
+              Tema claro
             </button>
           </div>
         </header>
@@ -662,6 +682,7 @@
               </div>
             </div>
           </section>
+
           <section id="page-alertas" class="page-section">
             <div class="page-header">
               <div>
@@ -781,6 +802,7 @@
     </div>
 
     <script src="./js/theme.js"></script>
+    <script src="./js/layout.js"></script>
     <script src="./js/app.js"></script>
   </body>
 </html>

@@ -15,6 +15,7 @@ node_modules/
 
 # VSCode
 .vscode/
+.idea/
 
 # Sistema operacional
 .DS_Store

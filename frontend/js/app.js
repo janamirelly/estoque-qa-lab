@@ -945,7 +945,7 @@ function validarFormularioProduto() {
   if (!nome) {
     return {
       valido: false,
-      mensagem: "Informe o nome do produto.",
+      mensagem: "Informe um nome de produto válido.",
     };
   }
 
