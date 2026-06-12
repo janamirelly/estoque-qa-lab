@@ -20,6 +20,7 @@ const motivosPorTipo = {
 let produtos = [];
 let movimentacoes = [];
 let produtoSelecionado = null;
+let produtoEmEdicao = null;
 let movimentacaoConcluida = false;
 let filtrosAlertasInicializados = false;
 
@@ -191,6 +192,24 @@ async function cadastrarProdutoApi(payload) {
   return dados;
 }
 
+async function editarProdutoApi(idVariacao, payload) {
+  const resposta = await fetch(`${API_BASE_URL}/produtos/${idVariacao}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao editar produto.");
+  }
+
+  return dados;
+}
+
 /* =========================
    Mapeamento API → Front
 ========================= */
@@ -204,6 +223,7 @@ function mapearProdutoApi(item) {
     variacao: `${item.cor} / ${item.tamanho}`,
     cor: item.cor,
     tamanho: item.tamanho,
+    preco: Number(item.preco),
     quantidade: Number(item.quantidade),
     estoqueMinimo: Number(item.estoque_min),
     statusApi: item.status,
@@ -428,7 +448,7 @@ function renderizarTabelaEstoque(listaProdutos) {
   if (listaProdutos.length === 0) {
     estoqueTabela.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Nenhum produto encontrado.</td>
+        <td colspan="7" class="empty-row">Nenhum produto encontrado.</td>
       </tr>
     `;
     return;
@@ -450,10 +470,57 @@ function renderizarTabelaEstoque(listaProdutos) {
               ${status.texto}
             </span>
           </td>
+           <td>
+            <button
+              type="button"
+              class="button-secondary btn-editar-produto"
+              data-id-variacao="${produto.idVariacao}"
+            >
+              Editar
+            </button>
+          </td>
         </tr>
       `;
     })
     .join("");
+  inicializarBotoesEdicaoProduto();
+}
+
+function inicializarBotoesEdicaoProduto() {
+  const botoesEditar = document.querySelectorAll(".btn-editar-produto");
+
+  botoesEditar.forEach((botao) => {
+    botao.addEventListener("click", () => {
+      const idVariacao = Number(botao.dataset.idVariacao);
+
+      const produto = produtos.find((item) => item.idVariacao === idVariacao);
+
+      if (!produto) {
+        exibirFeedback("Produto não encontrado para edição.", "error");
+        return;
+      }
+
+      preencherFormularioEdicaoProduto(produto);
+    });
+  });
+}
+
+function preencherFormularioEdicaoProduto(produto) {
+  produtoEmEdicao = produto;
+
+  document.getElementById("produtoNome").value = produto.nome;
+  document.getElementById("produtoCor").value = produto.cor;
+  document.getElementById("produtoTamanho").value = produto.tamanho;
+  document.getElementById("produtoSku").value = produto.sku;
+  document.getElementById("produtoPreco").value = produto.preco || "";
+  document.getElementById("produtoQuantidade").value = produto.quantidade;
+  document.getElementById("produtoEstoqueMinimo").value = produto.estoqueMinimo;
+
+  atualizarModoFormularioProduto("edicao");
+
+  limparFeedback();
+
+  navegarParaPagina("produtos");
 }
 
 function renderizarHistorico() {
@@ -852,6 +919,43 @@ function buscarProdutosEstoque(termo) {
 /* =========================
    Cadastro de produto
 ========================= */
+function atualizarModoFormularioProduto(modo) {
+  const tituloFormulario = document.querySelector(".product-create-card h3");
+  const subtituloFormulario = document.querySelector(
+    ".product-create-card .table-header p",
+  );
+  const btnCadastrarProduto = document.getElementById("btnCadastrarProduto");
+
+  if (modo === "edicao") {
+    if (tituloFormulario) {
+      tituloFormulario.textContent = "Editar produto";
+    }
+
+    if (subtituloFormulario) {
+      subtituloFormulario.textContent =
+        "Altere os dados do produto, da variação e do estoque.";
+    }
+
+    if (btnCadastrarProduto) {
+      btnCadastrarProduto.textContent = "Salvar alterações";
+    }
+
+    return;
+  }
+
+  if (tituloFormulario) {
+    tituloFormulario.textContent = "Novo produto";
+  }
+
+  if (subtituloFormulario) {
+    subtituloFormulario.textContent =
+      "Cadastre o produto, a variação inicial e o saldo de estoque.";
+  }
+
+  if (btnCadastrarProduto) {
+    btnCadastrarProduto.textContent = "Cadastrar produto";
+  }
+}
 
 function inicializarCadastroProduto() {
   const btnCadastrarProduto = document.getElementById("btnCadastrarProduto");
@@ -879,12 +983,21 @@ function inicializarCadastroProduto() {
   }
 
   if (btnCadastrarProduto) {
-    btnCadastrarProduto.addEventListener("click", cadastrarProduto);
+    btnCadastrarProduto.addEventListener("click", salvarProduto);
   }
 
   if (btnLimparProduto) {
     btnLimparProduto.addEventListener("click", limparFormularioProduto);
   }
+}
+
+async function salvarProduto() {
+  if (produtoEmEdicao) {
+    await editarProduto();
+    return;
+  }
+
+  await cadastrarProduto();
 }
 
 async function cadastrarProduto() {
@@ -917,6 +1030,49 @@ async function cadastrarProduto() {
   } catch (erro) {
     exibirFeedback(
       erro.message || "Não foi possível cadastrar o produto.",
+      "error",
+    );
+  } finally {
+    setBotaoCadastrarProdutoCarregando(false);
+  }
+}
+
+async function editarProduto() {
+  limparFeedback();
+
+  const validacao = validarFormularioProduto();
+
+  if (!validacao.valido) {
+    exibirFeedback(validacao.mensagem, "warning");
+    return;
+  }
+
+  const payload = montarPayloadProduto();
+
+  setBotaoCadastrarProdutoCarregando(true);
+
+  try {
+    const resposta = await editarProdutoApi(
+      produtoEmEdicao.idVariacao,
+      payload,
+    );
+
+    exibirFeedback(
+      resposta.message || "Produto atualizado com sucesso.",
+      "success",
+    );
+
+    produtoEmEdicao = null;
+
+    limparFormularioProduto();
+    atualizarModoFormularioProduto("cadastro");
+
+    await carregarDadosIniciais();
+
+    navegarParaPagina("estoque");
+  } catch (erro) {
+    exibirFeedback(
+      erro.message || "Não foi possível atualizar o produto.",
       "error",
     );
   } finally {
@@ -986,11 +1142,11 @@ function validarFormularioProduto() {
     };
   }
 
-  if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 0) {
+  if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 10) {
     return {
       valido: false,
       mensagem:
-        "O estoque mínimo deve ser um número inteiro maior ou igual a zero.",
+        "O estoque mínimo deve ser um número inteiro maior ou igual a 10.",
     };
   }
 
@@ -1056,6 +1212,8 @@ function limparFormularioProduto() {
 
     campo.value = "";
   });
+  atualizarModoFormularioProduto("cadastro");
+  limparFeedback();
 }
 
 function setBotaoCadastrarProdutoCarregando(carregando) {
@@ -1064,8 +1222,16 @@ function setBotaoCadastrarProdutoCarregando(carregando) {
   if (!btnCadastrarProduto) return;
 
   btnCadastrarProduto.disabled = carregando;
-  btnCadastrarProduto.textContent = carregando
-    ? "Cadastrando..."
+
+  if (carregando) {
+    btnCadastrarProduto.textContent = produtoEmEdicao
+      ? "Salvando..."
+      : "Cadastrando...";
+    return;
+  }
+
+  btnCadastrarProduto.textContent = produtoEmEdicao
+    ? "Salvar alterações"
     : "Cadastrar produto";
 }
 
@@ -1708,4 +1874,3 @@ function movimentacaoEhDeHoje(dataMovimentacao) {
 
   return String(dataMovimentacao).startsWith(dataHojeBR);
 }
-

@@ -1,3 +1,5 @@
+package variaveis;
+
 public class VariaveisEstoque {
     public static final String URL_ESTOQUE =
             "http://127.0.0.1:5500/frontend/index.html";
