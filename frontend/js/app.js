@@ -1057,11 +1057,6 @@ async function editarProduto() {
       payload,
     );
 
-    exibirFeedback(
-      resposta.message || "Produto atualizado com sucesso.",
-      "success",
-    );
-
     produtoEmEdicao = null;
 
     limparFormularioProduto();
@@ -1070,6 +1065,11 @@ async function editarProduto() {
     await carregarDadosIniciais();
 
     navegarParaPagina("estoque");
+
+    exibirFeedback(
+      resposta.message || "Alteração salva com sucesso.",
+      "success",
+    );
   } catch (erro) {
     exibirFeedback(
       erro.message || "Não foi possível atualizar o produto.",

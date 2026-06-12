@@ -560,7 +560,7 @@ async function editarProduto(req, res) {
       await run("COMMIT");
 
       return res.json({
-        message: "Produto atualizado com sucesso.",
+        message: "Alteração salva com sucesso.",
         produto: {
           id_produto: produtoEncontrado.id_produto,
           nome,
