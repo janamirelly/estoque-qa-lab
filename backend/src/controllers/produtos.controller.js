@@ -600,8 +600,126 @@ async function editarProduto(req, res) {
   }
 }
 
+async function deletarProduto(req, res) {
+  const idVariacao = Number(req.params.idVariacao);
+
+  try {
+    if (!Number.isInteger(idVariacao) || idVariacao <= 0) {
+      return res.status(400).json({
+        message: "ID da variação é inválido.",
+      });
+    }
+
+    const produtoAtual = await all(
+      `
+        SELECT
+          p.id_produto,
+          p.nome,
+          vp.id_variacao,
+          vp.cor,
+          vp.tamanho,
+          vp.sku,
+          e.quantidade,
+          e.estoque_min
+        FROM variacao_produto vp
+        INNER JOIN produto p
+          ON p.id_produto = vp.id_produto
+        INNER JOIN estoque e
+          ON e.id_variacao = vp.id_variacao
+        WHERE vp.id_variacao = ?
+      `,
+      [idVariacao],
+    );
+
+    if (produtoAtual.length === 0) {
+      return res.status(404).json({
+        message: "Produto não encontrado para exclusão.",
+      });
+    }
+
+    const produtoEncontrado = produtoAtual[0];
+
+    await run("BEGIN TRANSACTION");
+
+    try {
+      await run(
+        `
+          DELETE FROM estoque
+          WHERE id_variacao = ?
+        `,
+        [idVariacao],
+      );
+
+      await run(
+        `
+          DELETE FROM variacao_produto
+          WHERE id_variacao = ?
+        `,
+        [idVariacao],
+      );
+
+      await run(
+        `
+          DELETE FROM produto
+          WHERE id_produto = ?
+        `,
+        [produtoEncontrado.id_produto],
+      );
+
+      await run(
+        `
+          INSERT INTO auditoria (
+            acao,
+            recurso,
+            detalhes
+          )
+          VALUES (?, ?, ?)
+        `,
+        [
+          "PRODUTO_EXCLUIDO",
+          `variacao:${idVariacao}`,
+          JSON.stringify({
+            id_produto: produtoEncontrado.id_produto,
+            id_variacao: idVariacao,
+            nome: produtoEncontrado.nome,
+            cor: produtoEncontrado.cor,
+            tamanho: produtoEncontrado.tamanho,
+            sku: produtoEncontrado.sku,
+            quantidade: produtoEncontrado.quantidade,
+            estoque_min: produtoEncontrado.estoque_min,
+          }),
+        ],
+      );
+
+      await run("COMMIT");
+
+      return res.json({
+        message: "Produto excluído com sucesso.",
+        produto: {
+          id_produto: produtoEncontrado.id_produto,
+          nome: produtoEncontrado.nome,
+        },
+        variacao: {
+          id_variacao: idVariacao,
+          sku: produtoEncontrado.sku,
+        },
+      });
+    } catch (error) {
+      await run("ROLLBACK");
+      throw error;
+    }
+  } catch (error) {
+    console.error("[PRODUTOS] erro ao excluir:", error.message);
+
+    return res.status(500).json({
+      message: "Erro ao excluir produto.",
+    });
+  }
+}
+
 module.exports = {
   listarProdutos,
   criarProduto,
   editarProduto,
+  deletarProduto,
 };

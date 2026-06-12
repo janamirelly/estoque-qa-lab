@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import variaveis.CadastroProduto;
@@ -75,21 +74,11 @@ public class CadastroProdutoTest {
 
         //E: Clicar no botão CadasTrar produto
         WebDriverWait wait = new WebDriverWait(driver,
-                Duration.ofSeconds(5));
+                Duration.ofSeconds(10));
 
-        WebElement botaoCadastrar = wait.until(
-                ExpectedConditions.elementToBeClickable(ElementosEstoque.BOTAO_CADASTRAR)
+        wait.until(ExpectedConditions.elementToBeClickable(ElementosEstoque.BOTAO_CADASTRAR))
+                .click();
 
-        );
-
-        new Actions(driver)
-                .scrollToElement(botaoCadastrar)
-                .moveToElement(botaoCadastrar)
-                .perform();
-
-        wait.until(ExpectedConditions.elementToBeClickable(botaoCadastrar));
-
-        botaoCadastrar.click();
 
         // Então: o sistema deve permitir o cadastro do produto
         WebElement mensagemSucesso = wait.until(
@@ -110,22 +99,6 @@ public class CadastroProdutoTest {
                 ProdutoDAO.existeProdutoPorSku(sku)
         );
     }
-
-    @Test
-    public void CT03_editarProdutoValido() {
-        //Dado: que existe um produto cadastrado
-        String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
-        String cor = MassaCadastroProduto.corValida();
-        String tamanho = MassaCadastroProduto.tamanhoValido();
-        String sku = MassaCadastroProduto.skuValido();
-        String preco = MassaCadastroProduto.precoValido();
-        String novoPreco = "69.90";
-        String quantidadeInicial = MassaCadastroProduto.quantidadeInicialValida();
-        String estoqueMinimo = MassaCadastroProduto.estoqueMinimoValido();
-
-
-    }
-
 
 }
 

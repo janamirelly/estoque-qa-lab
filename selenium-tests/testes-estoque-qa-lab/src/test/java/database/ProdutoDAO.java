@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 
 public class ProdutoDAO {
     private static final String CAMINHO_BANCO =
-                    "C:/estoque-qa-lab/backend/db/estoque_qa_lab.db";
+            "C:/estoque-qa-lab/backend/db/estoque_qa_lab.db";
 
     private static final String URL_BANCO =
             "jdbc:sqlite:" + CAMINHO_BANCO;
@@ -61,5 +61,32 @@ public class ProdutoDAO {
         }
         return false;
     }
+
+    public static boolean existeProdutoComPreco(String sku, String precoEsperado) {
+        String sql = "SELECT COUNT(*) FROM variacao_produto WHERE sku = ? AND CAST(preco AS REAL) = ?";
+
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
+
+            statement.setString(1, sku);
+            statement.setDouble(2, Double.parseDouble(precoEsperado));
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    int quantidadeEncontrada = resultado.getInt(1);
+                    return quantidadeEncontrada > 0;
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException
+                    ("Erro ao consultar produto editado" +
+                            " por SKU e preço!", erro);
+        }
+
+        return false;
+    }
+
+
 
 }

@@ -210,6 +210,20 @@ async function editarProdutoApi(idVariacao, payload) {
   return dados;
 }
 
+async function deletarProdutoApi(idVariacao) {
+  const resposta = await fetch(`${API_BASE_URL}/produtos/${idVariacao}`, {
+    method: "DELETE",
+  });
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || "Erro ao excluir produto.");
+  }
+
+  return dados;
+}
+
 /* =========================
    Mapeamento API → Front
 ========================= */
@@ -471,19 +485,34 @@ function renderizarTabelaEstoque(listaProdutos) {
             </span>
           </td>
            <td>
-            <button
-              type="button"
-              class="button-secondary btn-editar-produto"
-              data-id-variacao="${produto.idVariacao}"
-            >
-              Editar
-            </button>
-          </td>
+  <div class="table-actions">
+    <button
+      type="button"
+      class="button-secondary btn-editar-produto"
+      data-testid="btn-editar-produto"
+      data-id-variacao="${produto.idVariacao}"
+    >
+      Editar
+    </button>
+
+    <button
+      type="button"
+      class="button-danger-outline btn-excluir-produto"
+      data-testid="btn-excluir-produto"
+      data-id-variacao="${produto.idVariacao}"
+      data-produto-nome="${produto.nome}"
+      data-produto-sku="${produto.sku}"
+    >
+      Excluir
+    </button>
+  </div>
+</td>
         </tr>
       `;
     })
     .join("");
   inicializarBotoesEdicaoProduto();
+  inicializarBotoesExclusaoProduto();
 }
 
 function inicializarBotoesEdicaoProduto() {
@@ -501,6 +530,26 @@ function inicializarBotoesEdicaoProduto() {
       }
 
       preencherFormularioEdicaoProduto(produto);
+    });
+  });
+}
+
+function inicializarBotoesExclusaoProduto() {
+  const botoesExcluir = document.querySelectorAll(".btn-excluir-produto");
+
+  botoesExcluir.forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const idVariacao = Number(botao.dataset.idVariacao);
+      const nomeProduto = botao.dataset.produtoNome || "produto";
+      const skuProduto = botao.dataset.produtoSku || "";
+
+      const confirmouExclusao = window.confirm(
+        `Deseja excluir o produto "${nomeProduto}"${skuProduto ? ` - ${skuProduto}` : ""}?`,
+      );
+
+      if (!confirmouExclusao) return;
+
+      await excluirProduto(idVariacao);
     });
   });
 }
@@ -1077,6 +1126,42 @@ async function editarProduto() {
     );
   } finally {
     setBotaoCadastrarProdutoCarregando(false);
+  }
+}
+
+async function excluirProduto(idVariacao) {
+  limparFeedback();
+
+  if (!Number.isInteger(idVariacao) || idVariacao <= 0) {
+    exibirFeedback("Produto inválido para exclusão.", "error");
+    return;
+  }
+
+  try {
+    const resposta = await deletarProdutoApi(idVariacao);
+
+    if (
+      produtoEmEdicao &&
+      Number(produtoEmEdicao.idVariacao) === Number(idVariacao)
+    ) {
+      produtoEmEdicao = null;
+      limparFormularioProduto();
+      atualizarModoFormularioProduto("cadastro");
+    }
+
+    await carregarDadosIniciais();
+
+    navegarParaPagina("estoque");
+
+    exibirFeedback(
+      resposta.message || "Produto excluído com sucesso.",
+      "success",
+    );
+  } catch (erro) {
+    exibirFeedback(
+      erro.message || "Não foi possível excluir o produto.",
+      "error",
+    );
   }
 }
 

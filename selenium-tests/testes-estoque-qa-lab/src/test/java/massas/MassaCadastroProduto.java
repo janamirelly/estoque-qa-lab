@@ -33,10 +33,6 @@ public class MassaCadastroProduto {
         return "10";
     }
 
-    public static String estoqueMinimoMenorQuePermitido() {
-        return "9";
-    }
-
     public static String estoqueMinimoNegativo() {
         return "-1";
     }
@@ -51,5 +47,9 @@ public class MassaCadastroProduto {
 
     public static String estoqueMinimoVazio() {
         return "";
+    }
+
+    public static String novoPrecoValidoEdicao() {
+        return "69.90";
     }
 }
