@@ -206,7 +206,6 @@
    RESPONSIVO — MOBILE
 ========================================================= */
 @media (max-width: 640px) {
-
   .mobile-header {
     padding: var(--space-4);
   }
@@ -376,7 +375,6 @@
     min-width: 0 !important;
     padding: 0 !important;
     border-bottom: 0;
-    vertical-align: initial;
   }
 
   #dashboardMovimentacoes td:nth-child(1) {
@@ -537,7 +535,7 @@
     padding: 0 !important;
     border-bottom: 0;
     text-align: left !important;
-    vertical-align: initial;
+    
   }
 
   #dashboardMovimentacoes td:nth-child(1) {
