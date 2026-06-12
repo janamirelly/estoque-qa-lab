@@ -904,7 +904,10 @@ tbody tr:last-child td {
 }
 
 /* Botão do histórico: ação secundária, alinhada ao bloco */
-#page-dashboard .card:has(#dashboardMovimentacoes) .table-header .button-secondary {
+#page-dashboard
+  .card:has(#dashboardMovimentacoes)
+  .table-header
+  .button-secondary {
   width: fit-content;
   min-width: 220px;
   height: 42px;
@@ -994,4 +997,22 @@ tbody tr:last-child td {
   min-height: 28px;
   padding: 0 12px;
   justify-content: center;
+}
+
+.button-primary,
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.product-form-actions .button-secondary {
+  min-width: 140px;
+  min-height: 44px;
+}
+
+.product-form-actions .button-primary {
+  min-width: 140px;
+  min-height: 44px;
 }
