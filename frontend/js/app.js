@@ -1066,16 +1066,16 @@ async function cadastrarProduto() {
   try {
     const resposta = await cadastrarProdutoApi(payload);
 
-    exibirFeedback(
-      resposta.message || "Produto cadastrado com sucesso.",
-      "success",
-    );
-
     limparFormularioProduto();
 
     await carregarDadosIniciais();
 
     navegarParaPagina("estoque");
+
+    exibirFeedback(
+      resposta.message || "Produto cadastrado com sucesso.",
+      "success",
+    );
   } catch (erro) {
     exibirFeedback(
       erro.message || "Não foi possível cadastrar o produto.",

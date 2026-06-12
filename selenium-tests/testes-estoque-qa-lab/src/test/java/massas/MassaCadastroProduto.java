@@ -18,7 +18,7 @@ public class MassaCadastroProduto {
     }
 
     public static String skuValido() {
-        return "CAM" + faker.number().numberBetween(100, 999) + "-AZUL-M";
+        return "CAM" + System.currentTimeMillis() + "-AZUL-M";
     }
 
     public static String precoValido() {

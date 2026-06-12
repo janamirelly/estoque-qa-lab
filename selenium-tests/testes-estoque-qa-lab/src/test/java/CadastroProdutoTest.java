@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import variaveis.CadastroProduto;
@@ -26,11 +27,21 @@ public class CadastroProdutoTest {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
 
-        driver.get(VariaveisEstoque.URL_ESTOQUE);
-        driver.findElement(ElementosEstoque.BOTAO_CADASTRO).click();
-        assertTrue(driver.findElement(ElementosEstoque
-                .PG_CADASTRO_PRODUTO_ATIVA).isDisplayed());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
+        driver.get(VariaveisEstoque.URL_ESTOQUE);
+
+        wait.until(ExpectedConditions.elementToBeClickable(ElementosEstoque.BOTAO_CADASTRO))
+                .click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA
+        ));
+
+        assertTrue(
+                driver.findElement(ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA)
+                        .isDisplayed()
+        );
     }
 
     //@After
@@ -74,18 +85,30 @@ public class CadastroProdutoTest {
 
         //E: Clicar no botão CadasTrar produto
         WebDriverWait wait = new WebDriverWait(driver,
-                Duration.ofSeconds(10));
+                Duration.ofSeconds(5));
 
-        wait.until(ExpectedConditions.elementToBeClickable(ElementosEstoque.BOTAO_CADASTRAR))
-                .click();
+        WebElement botaoCadastrar = wait.until(
+                ExpectedConditions.elementToBeClickable
+                        (ElementosEstoque.BOTAO_CADASTRAR)
+        );
+
+        new Actions(driver)
+                .scrollToElement(botaoCadastrar)
+                .perform();
+
+        botaoCadastrar.click();
 
 
         // Então: o sistema deve permitir o cadastro do produto
-        WebElement mensagemSucesso = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        ElementosEstoque.TEXTO_FEEDBACK
+        wait.until(
+                ExpectedConditions.textToBePresentInElementLocated(
+                        ElementosEstoque.TEXTO_FEEDBACK,
+                        "Produto cadastrado com sucesso"
                 )
         );
+
+        WebElement mensagemSucesso =
+                driver.findElement(ElementosEstoque.TEXTO_FEEDBACK);
 
         // E: exibir a mensagem de sucesso
         assertTrue(
@@ -93,7 +116,7 @@ public class CadastroProdutoTest {
                         ("Produto cadastrado com sucesso")
         );
 
-        //E: o produto dever ser persistido no banco de dados
+        //E: o produto deve ser persistido no banco de dados
         assertTrue(
                 "O produto cadastrado não foi encontrado no banco de dados.",
                 ProdutoDAO.existeProdutoPorSku(sku)
