@@ -229,6 +229,26 @@ async function criarProduto(req, res) {
         [variacaoCriada.lastID, quantidade, estoqueMin],
       );
 
+      if (quantidade > 0) {
+        await run(
+          `
+      INSERT INTO movimentacao_estoque (
+        id_variacao,
+        tipo,
+        quantidade,
+        observacao
+      )
+      VALUES (?, ?, ?, ?)
+    `,
+          [
+            variacaoCriada.lastID,
+            "ENTRADA",
+            quantidade,
+            "Entrada inicial no cadastro do produto",
+          ],
+        );
+      }
+
       await run(
         `
           INSERT INTO auditoria (

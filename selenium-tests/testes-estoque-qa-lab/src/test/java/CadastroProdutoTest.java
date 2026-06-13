@@ -1,8 +1,10 @@
 import database.ProdutoDAO;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import massas.MassaCadastroProduto;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -15,15 +17,25 @@ import variaveis.VariaveisEstoque;
 
 import java.time.Duration;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CadastroProdutoTest {
     private WebDriver driver;
 
+    private static final String MSG_PRODUTO_CADASTRADO =
+            "Produto cadastrado com sucesso";
+
+    private static final String MSG_ALTERACAO_SALVA =
+            "Alteração salva com sucesso";
+
+    private static final String MSG_PRODUTO_EXCLUIDO =
+            "Produto excluído com sucesso";
 
     @Before
     public void iniciarTeste() {
         WebDriverManager.chromedriver().setup();
+
         driver = new ChromeDriver();
         driver.manage().window().maximize();
 
@@ -31,8 +43,9 @@ public class CadastroProdutoTest {
 
         driver.get(VariaveisEstoque.URL_ESTOQUE);
 
-        wait.until(ExpectedConditions.elementToBeClickable(ElementosEstoque.BOTAO_CADASTRO))
-                .click();
+        wait.until(ExpectedConditions.elementToBeClickable(
+                ElementosEstoque.BOTAO_CADASTRO
+        )).click();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(
                 ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA
@@ -46,21 +59,143 @@ public class CadastroProdutoTest {
 
     //@After
     //public void finalizarTeste() {
-    //   driver.quit();
+     //   driver.quit();
     //}
 
     @Test
     public void CT02_cadastrarProdutoValido() {
-        //Dado: que o usuário esteja na tela de cadastro
+        // Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();
         String tamanho = MassaCadastroProduto.tamanhoValido();
         String sku = MassaCadastroProduto.skuValido();
         String preco = MassaCadastroProduto.precoValido();
-        String quantidadeInicial = MassaCadastroProduto.quantidadeInicialValida();
-        String estoqueMinimo = MassaCadastroProduto.estoqueMinimoValido();
+        String quantidadeInicial =
+                MassaCadastroProduto.quantidadeInicialValida();
+        String estoqueMinimo =
+                MassaCadastroProduto.estoqueMinimoValido();
 
-        // Quando: preencher os campos do produto
+        // Quando: preencher os dados válidos do produto
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                tamanho,
+                sku,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+
+        // Então: o sistema deve exibir mensagem de sucesso
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        // E: o produto deve ser persistido no banco de dados
+        assertTrue(
+                "O produto cadastrado não foi encontrado no banco de dados.",
+                ProdutoDAO.existeProdutoPorSku(sku)
+        );
+    }
+
+    @Test
+    public void CT03_editarProdutoValido() {
+        // Dado: que exista um produto cadastrado para edição
+        String sku = cadastrarProdutoParaTeste();
+        String novoPreco = MassaCadastroProduto.novoPrecoValidoEdicao();
+
+        // Quando: buscar o produto cadastrado na tela de estoque
+        acessarTelaConsultarEstoque();
+        buscarProdutoPorSku(sku);
+
+        // E: clicar em Editar
+        clicarBotaoEditarProduto();
+
+        aguardarTelaCadastroProduto();
+
+        // E: alterar o preço do produto
+        alterarPrecoProduto(novoPreco);
+
+        // E: clicar em Salvar alterações
+        clicarBotaoSalvarAlteracoes();
+
+        // Então: o sistema deve exibir mensagem de sucesso da edição
+        validarMensagemFeedback(MSG_ALTERACAO_SALVA);
+
+        // E: o novo preço deve ser persistido no banco
+        assertTrue(
+                "O preço editado não foi encontrado no banco de dados.",
+                ProdutoDAO.produtoPossuiPreco(sku, novoPreco)
+        );
+    }
+
+    @Test
+    public void CT04_excluirProdutoValido() {
+        // Dado: que exista um produto cadastrado para exclusão
+        String sku = cadastrarProdutoParaTeste();
+
+        // Quando: buscar o produto cadastrado na tela de estoque
+        acessarTelaConsultarEstoque();
+        buscarProdutoPorSku(sku);
+
+        // E: clicar em Excluir
+        clicarBotaoExcluirProduto();
+
+        // E: confirmar a exclusão no alerta do navegador
+        confirmarExclusaoProduto();
+
+        // Então: o sistema deve exibir mensagem de sucesso da exclusão
+        validarMensagemFeedback(MSG_PRODUTO_EXCLUIDO);
+
+        // E: o produto não deve mais ser encontrado no banco de dados
+        assertFalse(
+                "O produto excluído ainda foi encontrado no banco de dados.",
+                ProdutoDAO.existeProdutoPorSku(sku)
+        );
+    }
+
+    private String cadastrarProdutoParaTeste() {
+        String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
+        String cor = MassaCadastroProduto.corValida();
+        String tamanho = MassaCadastroProduto.tamanhoValido();
+        String sku = MassaCadastroProduto.skuValido();
+        String preco = MassaCadastroProduto.precoValido();
+        String quantidadeInicial =
+                MassaCadastroProduto.quantidadeInicialValida();
+        String estoqueMinimo =
+                MassaCadastroProduto.estoqueMinimoValido();
+
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                tamanho,
+                sku,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        assertTrue(
+                "Produto não foi cadastrado para preparação do teste.",
+                ProdutoDAO.existeProdutoPorSku(sku)
+        );
+
+        return sku;
+    }
+
+    private void preencherFormularioProduto(
+            String nomeProduto,
+            String cor,
+            String tamanho,
+            String sku,
+            String preco,
+            String quantidadeInicial,
+            String estoqueMinimo
+    ) {
         driver.findElement(CadastroProduto.INPUT_NOME)
                 .sendKeys(nomeProduto);
 
@@ -80,16 +215,18 @@ public class CadastroProdutoTest {
         driver.findElement(CadastroProduto.INPUT_QTD)
                 .sendKeys(quantidadeInicial);
 
+        driver.findElement(CadastroProduto.INPUT_ESTOQUE_MIN).clear();
         driver.findElement(CadastroProduto.INPUT_ESTOQUE_MIN)
                 .sendKeys(estoqueMinimo);
+    }
 
-        //E: Clicar no botão CadasTrar produto
-        WebDriverWait wait = new WebDriverWait(driver,
-                Duration.ofSeconds(5));
+    private void clicarBotaoCadastrarProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         WebElement botaoCadastrar = wait.until(
-                ExpectedConditions.elementToBeClickable
-                        (ElementosEstoque.BOTAO_CADASTRAR)
+                ExpectedConditions.elementToBeClickable(
+                        ElementosEstoque.BOTAO_CADASTRAR
+                )
         );
 
         new Actions(driver)
@@ -97,33 +234,131 @@ public class CadastroProdutoTest {
                 .perform();
 
         botaoCadastrar.click();
+    }
 
+    private void acessarTelaConsultarEstoque() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        // Então: o sistema deve permitir o cadastro do produto
+        wait.until(ExpectedConditions.elementToBeClickable(
+                ElementosEstoque.BOTAO_CONSULTAR_ESTOQUE
+        )).click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                ElementosEstoque.PG_CONSULTAR_ESTOQUE_ATIVA
+        ));
+    }
+
+    private void buscarProdutoPorSku(String sku) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement campoBusca = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        ElementosEstoque.INPUT_BUSCA_ESTOQUE
+                )
+        );
+
+        campoBusca.clear();
+        campoBusca.sendKeys(sku);
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                ElementosEstoque.BOTAO_BUSCAR_ESTOQUE
+        )).click();
+    }
+
+    private void clicarBotaoEditarProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement botaoEditar = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        ElementosEstoque.BOTAO_EDITAR_PRODUTO
+                )
+        );
+
+        new Actions(driver)
+                .scrollToElement(botaoEditar)
+                .perform();
+
+        botaoEditar.click();
+    }
+
+    private void clicarBotaoExcluirProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement botaoExcluir = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        ElementosEstoque.BOTAO_EXCLUIR_PRODUTO
+                )
+        );
+
+        new Actions(driver)
+                .scrollToElement(botaoExcluir)
+                .perform();
+
+        botaoExcluir.click();
+    }
+
+    private void confirmarExclusaoProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        Alert alerta = wait.until(ExpectedConditions.alertIsPresent());
+
+        alerta.accept();
+    }
+
+    private void aguardarTelaCadastroProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA
+        ));
+    }
+
+    private void alterarPrecoProduto(String novoPreco) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement campoPreco = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        CadastroProduto.INPUT_PRECO
+                )
+        );
+
+        campoPreco.clear();
+        campoPreco.sendKeys(novoPreco);
+    }
+
+    private void clicarBotaoSalvarAlteracoes() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement botaoSalvarAlteracoes = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        ElementosEstoque.BOTAO_SALVAR_ALTERACOES
+                )
+        );
+
+        new Actions(driver)
+                .scrollToElement(botaoSalvarAlteracoes)
+                .perform();
+
+        botaoSalvarAlteracoes.click();
+    }
+
+    private void validarMensagemFeedback(String mensagemEsperada) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
         wait.until(
                 ExpectedConditions.textToBePresentInElementLocated(
                         ElementosEstoque.TEXTO_FEEDBACK,
-                        "Produto cadastrado com sucesso"
+                        mensagemEsperada
                 )
         );
 
         WebElement mensagemSucesso =
                 driver.findElement(ElementosEstoque.TEXTO_FEEDBACK);
 
-        // E: exibir a mensagem de sucesso
         assertTrue(
-                mensagemSucesso.getText().contains
-                        ("Produto cadastrado com sucesso")
-        );
-
-        //E: o produto deve ser persistido no banco de dados
-        assertTrue(
-                "O produto cadastrado não foi encontrado no banco de dados.",
-                ProdutoDAO.existeProdutoPorSku(sku)
+                mensagemSucesso.getText().contains(mensagemEsperada)
         );
     }
-
 }
-
 
 

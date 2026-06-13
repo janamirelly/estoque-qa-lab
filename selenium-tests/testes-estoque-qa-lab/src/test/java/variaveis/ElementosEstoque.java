@@ -39,6 +39,12 @@ public class ElementosEstoque {
     public static final By BOTAO_EDITAR_PRODUTO =
             By.cssSelector(".btn-editar-produto");
 
+    public static final By BOTAO_SALVAR_ALTERACOES =
+            By.id("btnCadastrarProduto");
+
+    public static final By BOTAO_EXCLUIR_PRODUTO =
+            By.cssSelector(".btn-excluir-produto");
+
     // Feedback geral da aplicação
     public static final By MENSAGEM_SUCESSO =
             By.id("feedbackMessage");

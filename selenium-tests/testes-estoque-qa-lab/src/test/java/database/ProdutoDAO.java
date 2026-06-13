@@ -1,11 +1,9 @@
 package database;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 
 public class ProdutoDAO {
     private static final String CAMINHO_BANCO =
@@ -85,6 +83,30 @@ public class ProdutoDAO {
         }
 
         return false;
+    }
+
+    public static boolean produtoPossuiPreco(String sku, String precoEsperado) {
+        String sql = """
+            SELECT COUNT(*) 
+            FROM variacoes v
+            INNER JOIN produtos p ON p.id = v.produto_id
+            WHERE v.sku = ?
+            AND p.preco = ?
+            """;
+
+        try (Connection conexao = DriverManager.getConnection(URL_BANCO);
+             PreparedStatement stmt = conexao.prepareStatement(sql)) {
+
+            stmt.setString(1, sku);
+            stmt.setBigDecimal(2, new BigDecimal(precoEsperado));
+
+            ResultSet resultado = stmt.executeQuery();
+
+            return resultado.next() && resultado.getInt(1) > 0;
+
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao consultar preço do produto no banco.", erro);
+        }
     }
 
 
