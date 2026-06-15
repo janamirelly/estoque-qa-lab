@@ -34,14 +34,20 @@ async function listarProdutos(req, res) {
   try {
     const produtos = await all(`
       SELECT
-        id_produto,
-        nome,
-        descricao,
-        ativo,
-        criado_em
-      FROM produto
-      WHERE ativo = 1
-      ORDER BY nome
+        p.id_produto,
+        p.nome,
+        p.descricao,
+        p.ativo,
+        p.criado_em,
+        vp.id_variacao,
+        vp.sku,
+        vp.cor,
+        vp.tamanho
+      FROM produto p
+      INNER JOIN variacao_produto vp
+        ON vp.id_produto = p.id_produto
+      WHERE p.ativo = 1
+      ORDER BY p.criado_em DESC
     `);
 
     return res.json(produtos);
