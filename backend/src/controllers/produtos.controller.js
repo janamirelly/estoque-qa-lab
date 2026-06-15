@@ -635,6 +635,7 @@ async function deletarProduto(req, res) {
         SELECT
           p.id_produto,
           p.nome,
+          p.ativo,
           vp.id_variacao,
           vp.cor,
           vp.tamanho,
@@ -659,28 +660,19 @@ async function deletarProduto(req, res) {
 
     const produtoEncontrado = produtoAtual[0];
 
+    if (Number(produtoEncontrado.ativo) === 0) {
+      return res.status(400).json({
+        message: "Produto já está excluído.",
+      });
+    }
+
     await run("BEGIN TRANSACTION");
 
     try {
       await run(
         `
-          DELETE FROM estoque
-          WHERE id_variacao = ?
-        `,
-        [idVariacao],
-      );
-
-      await run(
-        `
-          DELETE FROM variacao_produto
-          WHERE id_variacao = ?
-        `,
-        [idVariacao],
-      );
-
-      await run(
-        `
-          DELETE FROM produto
+          UPDATE produto
+          SET ativo = 0
           WHERE id_produto = ?
         `,
         [produtoEncontrado.id_produto],
@@ -718,6 +710,7 @@ async function deletarProduto(req, res) {
         produto: {
           id_produto: produtoEncontrado.id_produto,
           nome: produtoEncontrado.nome,
+          ativo: 0,
         },
         variacao: {
           id_variacao: idVariacao,
@@ -729,7 +722,7 @@ async function deletarProduto(req, res) {
       throw error;
     }
   } catch (error) {
-    console.error("[PRODUTOS] erro ao excluir:", error.message);
+    console.error("[PRODUTOS] erro ao excluir:", error);
 
     return res.status(500).json({
       message: "Erro ao excluir produto.",

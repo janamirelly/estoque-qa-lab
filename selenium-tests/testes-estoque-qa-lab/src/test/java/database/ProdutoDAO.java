@@ -61,7 +61,12 @@ public class ProdutoDAO {
     }
 
     public static boolean existeProdutoComPreco(String sku, String precoEsperado) {
-        String sql = "SELECT COUNT(*) FROM variacao_produto WHERE sku = ? AND CAST(preco AS REAL) = ?";
+        String sql = """
+               SELECT COUNT(*) 
+               FROM variacao_produto 
+               WHERE sku = ? 
+                 AND CAST(preco AS REAL) = ?
+                    """;
 
         try (Connection conexao = conectar();
              PreparedStatement statement = conexao.prepareStatement(sql)) {
@@ -87,11 +92,10 @@ public class ProdutoDAO {
 
     public static boolean produtoPossuiPreco(String sku, String precoEsperado) {
         String sql = """
-            SELECT COUNT(*) 
-            FROM variacoes v
-            INNER JOIN produtos p ON p.id = v.produto_id
-            WHERE v.sku = ?
-            AND p.preco = ?
+             SELECT COUNT(*)
+            FROM variacao_produto
+            WHERE sku = ?
+            AND CAST(preco AS REAL) = ?
             """;
 
         try (Connection conexao = DriverManager.getConnection(URL_BANCO);
@@ -107,6 +111,36 @@ public class ProdutoDAO {
         } catch (SQLException erro) {
             throw new RuntimeException("Erro ao consultar preço do produto no banco.", erro);
         }
+    }
+
+    public static boolean produtoEstaAtivoPorSku(String sku) {
+        String sql = """
+            SELECT p.ativo
+            FROM produto p
+            INNER JOIN variacao_produto vp
+                    ON vp.id_produto = p.id_produto
+            WHERE vp.sku = ?
+            """;
+
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
+
+            statement.setString(1, sku);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("ativo") == 1;
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException(
+                    "Erro ao consultar status ativo do produto por SKU.",
+                    erro
+            );
+        }
+
+        return false;
     }
 
 

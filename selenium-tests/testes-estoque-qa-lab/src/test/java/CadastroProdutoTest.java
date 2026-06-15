@@ -1,7 +1,6 @@
 import database.ProdutoDAO;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import massas.MassaCadastroProduto;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Alert;
@@ -17,8 +16,7 @@ import variaveis.VariaveisEstoque;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CadastroProdutoTest {
     private WebDriver driver;
@@ -58,8 +56,8 @@ public class CadastroProdutoTest {
     }
 
     //@After
-    //public void finalizarTeste() {
-     //   driver.quit();
+   // public void finalizarTeste() {
+    //    driver.quit();
     //}
 
     @Test
@@ -100,8 +98,9 @@ public class CadastroProdutoTest {
 
     @Test
     public void CT03_editarProdutoValido() {
-        // Dado: que exista um produto cadastrado para edição
+        // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
+
         String novoPreco = MassaCadastroProduto.novoPrecoValidoEdicao();
 
         // Quando: buscar o produto cadastrado na tela de estoque
@@ -119,7 +118,7 @@ public class CadastroProdutoTest {
         // E: clicar em Salvar alterações
         clicarBotaoSalvarAlteracoes();
 
-        // Então: o sistema deve exibir mensagem de sucesso da edição
+        // Então: o sistema deve exibir mensagem de sucesso
         validarMensagemFeedback(MSG_ALTERACAO_SALVA);
 
         // E: o novo preço deve ser persistido no banco
@@ -137,6 +136,7 @@ public class CadastroProdutoTest {
         // Quando: buscar o produto cadastrado na tela de estoque
         acessarTelaConsultarEstoque();
         buscarProdutoPorSku(sku);
+        validarProdutoExibidoNaTabela(sku);
 
         // E: clicar em Excluir
         clicarBotaoExcluirProduto();
@@ -149,8 +149,8 @@ public class CadastroProdutoTest {
 
         // E: o produto não deve mais ser encontrado no banco de dados
         assertFalse(
-                "O produto excluído ainda foi encontrado no banco de dados.",
-                ProdutoDAO.existeProdutoPorSku(sku)
+                "O produto excluído continua ativo no banco de dados.",
+                ProdutoDAO.produtoEstaAtivoPorSku(sku)
         );
     }
 
@@ -263,6 +263,21 @@ public class CadastroProdutoTest {
         wait.until(ExpectedConditions.elementToBeClickable(
                 ElementosEstoque.BOTAO_BUSCAR_ESTOQUE
         )).click();
+    }
+
+    private void validarProdutoExibidoNaTabela(String sku) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement tabela = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        ElementosEstoque.TABELA_ESTOQUE
+                )
+        );
+
+        assertTrue(
+                "O produto buscado não apareceu na tabela.",
+                tabela.getText().contains(sku)
+        );
     }
 
     private void clicarBotaoEditarProduto() {
