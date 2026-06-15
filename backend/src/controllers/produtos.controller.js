@@ -737,9 +737,111 @@ async function deletarProduto(req, res) {
   }
 }
 
+async function excluirProdutosEmMassa(req, res) {
+  const { idsVariacao } = req.body;
+
+  try {
+    if (!Array.isArray(idsVariacao) || idsVariacao.length === 0) {
+      return res.status(400).json({
+        message: "Informe uma lista de IDs de variação.",
+      });
+    }
+
+    const idsValidos = idsVariacao
+      .map(Number)
+      .filter((id) => Number.isInteger(id) && id > 0);
+
+    if (idsValidos.length === 0) {
+      return res.status(400).json({
+        message: "Nenhum ID de variação válido foi informado.",
+      });
+    }
+
+    const placeholders = idsValidos.map(() => "?").join(",");
+
+    const produtosEncontrados = await all(
+      `
+        SELECT
+          p.id_produto,
+          p.nome,
+          vp.id_variacao,
+          vp.sku
+        FROM variacao_produto vp
+        INNER JOIN produto p
+          ON p.id_produto = vp.id_produto
+        WHERE vp.id_variacao IN (${placeholders})
+          AND p.ativo = 1
+      `,
+      idsValidos,
+    );
+
+    if (produtosEncontrados.length === 0) {
+      return res.status(404).json({
+        message: "Nenhum produto ativo encontrado para exclusão.",
+      });
+    }
+
+    const idsProdutos = produtosEncontrados.map(
+      (produto) => produto.id_produto,
+    );
+
+    const placeholdersProdutos = idsProdutos.map(() => "?").join(",");
+
+    await run("BEGIN TRANSACTION");
+
+    try {
+      await run(
+        `
+          UPDATE produto
+          SET ativo = 0
+          WHERE id_produto IN (${placeholdersProdutos})
+        `,
+        idsProdutos,
+      );
+
+      await run(
+        `
+          INSERT INTO auditoria (
+            acao,
+            recurso,
+            detalhes
+          )
+          VALUES (?, ?, ?)
+        `,
+        [
+          "PRODUTOS_EXCLUIDOS_EM_MASSA",
+          "produto",
+          JSON.stringify({
+            total: produtosEncontrados.length,
+            produtos: produtosEncontrados,
+          }),
+        ],
+      );
+
+      await run("COMMIT");
+
+      return res.json({
+        message: "Produtos excluídos com sucesso.",
+        total: produtosEncontrados.length,
+        produtos: produtosEncontrados,
+      });
+    } catch (error) {
+      await run("ROLLBACK");
+      throw error;
+    }
+  } catch (error) {
+    console.error("[PRODUTOS] erro ao excluir em massa:", error);
+
+    return res.status(500).json({
+      message: "Erro ao excluir produtos em massa.",
+    });
+  }
+}
+
 module.exports = {
   listarProdutos,
   criarProduto,
   editarProduto,
   deletarProduto,
+  excluirProdutosEmMassa,
 };

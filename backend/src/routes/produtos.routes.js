@@ -6,6 +6,7 @@ const {
   criarProduto,
   editarProduto,
   deletarProduto,
+  excluirProdutosEmMassa,
 } = require("../controllers/produtos.controller");
 
 // GET /produtos
@@ -19,5 +20,8 @@ router.put("/:idVariacao", editarProduto);
 
 // DELETE /produtos/:idVariacao
 router.delete("/:idVariacao", deletarProduto);
+
+//PATCH / produtos / exclusao-massa
+router.patch("/exclusao-massa", excluirProdutosEmMassa);
 
 module.exports = router;
