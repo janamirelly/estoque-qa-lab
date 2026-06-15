@@ -79,6 +79,8 @@ async function listarEstoque(req, res) {
         atualizado_em,
         status
       FROM vw_estoque_detalhado
+       WHERE produto_ativo = 1
+       AND variacao_ativa = 1
       ORDER BY produto, cor, tamanho
     `);
 

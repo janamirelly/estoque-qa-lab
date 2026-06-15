@@ -40,6 +40,7 @@ async function listarProdutos(req, res) {
         ativo,
         criado_em
       FROM produto
+      WHERE ativo = 1
       ORDER BY nome
     `);
 
