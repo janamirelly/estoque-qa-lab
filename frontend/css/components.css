@@ -1016,13 +1016,14 @@ th:last-child {
 .sku-text {
   display: inline-block;
 
-  width: auto;
-  max-width: 240px;
+  width: 168px;
+  max-width: 168px;
+  min-height: auto;
   padding: 4px 10px;
 
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 7px;
-  background: rgba(148, 163, 184, 0.045);
+  background: rgba(148, 163, 184, 0.035);
 
   color: var(--muted-strong);
   font-family:
@@ -1040,7 +1041,8 @@ th:last-child {
 
 /* Dashboard - últimas movimentações */
 #dashboardMovimentacoes .sku-text {
-  max-width: 230px;
+  width: 168px;
+  max-width: 168px;
 }
 
 /* Permite que a linha cresça quando a SKU quebrar */
