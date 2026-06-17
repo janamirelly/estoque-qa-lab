@@ -570,7 +570,6 @@
     padding: 0 !important;
     border-bottom: 0;
     text-align: left !important;
-    
   }
 
   #dashboardMovimentacoes td:nth-child(1) {
@@ -662,3 +661,333 @@
   }
 }
 
+/* =========================================================
+   RESPONSIVO — ALERTAS DE ESTOQUE
+   Ajuste de filtros e cards no mobile 420px
+========================================================= */
+@media (max-width: 420px) {
+  #page-alertas .content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  #page-alertas .card {
+    padding: 14px;
+  }
+
+  #page-alertas .filters-grid {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  #page-alertas .field input,
+  #page-alertas .field select,
+  #page-alertas .filters-actions .button-secondary {
+    min-height: 42px;
+  }
+
+  #page-alertas .filters-actions .button-secondary {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+/* =========================================================
+   RESPONSIVO — ALERTAS DE ESTOQUE
+   Ajuste de filtros e cards no mobile
+========================================================= */
+
+@media (max-width: 640px) {
+  #page-alertas .page-header {
+    margin-bottom: 18px;
+  }
+
+  #page-alertas .page-header h2 {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  #page-alertas .page-header p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  #page-alertas .card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #page-alertas .table-header {
+    margin-bottom: 16px;
+  }
+
+  #page-alertas .table-header h3 {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+
+  #page-alertas .table-header p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  #page-alertas .filters-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  #page-alertas .field {
+    min-width: 0;
+  }
+
+  #page-alertas .field label {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  #page-alertas .field input,
+  #page-alertas .field select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  #page-alertas .filters-actions {
+    width: 100%;
+  }
+
+  #page-alertas .filters-actions .button-secondary {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 14px;
+  }
+
+  #page-alertas .alertas-grid {
+    gap: 12px;
+  }
+
+  #page-alertas .stock-status {
+    width: fit-content;
+  }
+
+  #alertasStatus {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   RESPONSIVO — CONSULTAR ESTOQUE
+   Ajuste da busca no mobile
+========================================================= */
+
+@media (max-width: 640px) {
+  #page-estoque .card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #page-estoque .table-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  #page-estoque .table-header h3 {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  #page-estoque .table-header p {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  #page-estoque .search-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    align-items: stretch;
+  }
+
+  #page-estoque .search-area .input-with-icon {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #page-estoque .search-area input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-left: 42px;
+    font-size: 14px;
+  }
+
+  #page-estoque .search-area .button-primary {
+    width: 112px;
+    min-width: 112px;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  #page-estoque .table-wrapper {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  #page-estoque .search-area {
+    grid-template-columns: 1fr;
+  }
+
+  #page-estoque .search-area .button-primary {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* =========================================================
+   RESPONSIVO — CONSULTAR ESTOQUE
+   Tabela em cards no mobile
+========================================================= */
+
+@media (max-width: 640px) {
+  #page-estoque .table-wrapper {
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+
+  #page-estoque table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    border-collapse: separate;
+  }
+
+  #page-estoque thead {
+    display: none;
+  }
+
+  #estoqueTabela {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+  }
+
+  #estoqueTabela tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  #estoqueTabela td {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    border-bottom: 0;
+    text-align: left !important;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  #estoqueTabela td:nth-child(1) {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+
+  #estoqueTabela td:nth-child(2) {
+    color: var(--muted-strong);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.25;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  #estoqueTabela td:nth-child(2)::before {
+  content: "SKU: ";
+  color: var(--muted-strong);
+  font-family: var(--font-family);
+  font-weight: 800;
+}
+
+  #estoqueTabela td:nth-child(3)::before {
+    content: "Variação: ";
+    color: var(--muted-strong);
+    font-weight: 800;
+  }
+
+  #estoqueTabela td:nth-child(4)::before {
+    content: "Quantidade: ";
+    color: var(--muted-strong);
+    font-weight: 800;
+  }
+
+  #estoqueTabela td:nth-child(5)::before {
+    content: "Estoque mínimo: ";
+    color: var(--muted-strong);
+    font-weight: 800;
+  }
+
+  #estoqueTabela td:nth-child(6)::before {
+    content: "Status: ";
+    color: var(--muted-strong);
+    font-weight: 800;
+  }
+
+  #estoqueTabela td:nth-child(7) {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  #estoqueTabela .table-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #estoqueTabela .button-secondary,
+  #estoqueTabela .button-danger-outline {
+    width: auto;
+    min-width: 74px;
+    flex: 1;
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  #estoqueTabela .empty-row {
+    padding: 18px !important;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-soft);
+    text-align: center !important;
+    color: var(--muted);
+  }
+}
