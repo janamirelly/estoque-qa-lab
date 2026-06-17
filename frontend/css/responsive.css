@@ -930,11 +930,11 @@
   }
 
   #estoqueTabela td:nth-child(2)::before {
-  content: "SKU: ";
-  color: var(--muted-strong);
-  font-family: var(--font-family);
-  font-weight: 800;
-}
+    content: "SKU: ";
+    color: var(--muted-strong);
+    font-family: var(--font-family);
+    font-weight: 800;
+  }
 
   #estoqueTabela td:nth-child(3)::before {
     content: "Variação: ";
@@ -989,5 +989,134 @@
     background: var(--surface-soft);
     text-align: center !important;
     color: var(--muted);
+  }
+}
+
+/* =========================================================
+   HISTÓRICO — Cabeçalho do card em tablet/desktop
+========================================================= */
+
+@media (min-width: 641px) {
+  #page-historico .card .table-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 24px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  #page-historico .card .table-header > div {
+    max-width: 620px;
+  }
+
+  #page-historico #btnAtualizarHistorico {
+    width: auto;
+    min-width: 104px;
+    min-height: 40px;
+    justify-self: end;
+    align-self: start;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  #page-historico .card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #page-historico .table-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  #page-historico .table-header h3 {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  #page-historico .table-header p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  #page-historico #btnAtualizarHistorico {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    justify-self: stretch;
+  }
+
+  #page-historico .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  #page-historico .filters-actions {
+    width: 100%;
+  }
+
+  #page-historico .filters-actions .button-secondary {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 420px) {
+  #page-historico .filters-grid {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  #page-historico .field input,
+  #page-historico .field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  #page-historico .date-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #page-historico .date-field input {
+    padding-right: 42px;
+  }
+}
+
+/* =========================================================
+   HISTÓRICO — Ajuste do botão Limpar filtros
+========================================================= */
+
+@media (min-width: 641px) {
+  #page-historico .filters-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  #page-historico .filters-actions .button-secondary {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  #page-historico .filters-actions {
+    width: 100%;
+  }
+
+  #page-historico .filters-actions .button-secondary {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
   }
 }
