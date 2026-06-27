@@ -743,6 +743,16 @@ function nomeProdutoValido(nome) {
   );
 }
 
+function corVariacaoValida(cor) {
+  const corTratada = String(cor || "").trim();
+
+  return (
+    corTratada.length >= 3 &&
+    /[\p{L}]/u.test(corTratada) &&
+    /^[\p{L} \-/.]+$/u.test(corTratada)
+  );
+}
+
 function obterStatusFiltroProduto(produto) {
   const quantidade = Number(produto.quantidade);
   const estoqueMinimo = Number(produto.estoqueMinimo);
@@ -1201,10 +1211,10 @@ function validarFormularioProduto() {
     };
   }
 
-  if (!cor) {
+  if (!corVariacaoValida(cor)) {
     return {
       valido: false,
-      mensagem: "Informe a cor da variação.",
+      mensagem: "Informe uma cor válida para a variação.",
     };
   }
 

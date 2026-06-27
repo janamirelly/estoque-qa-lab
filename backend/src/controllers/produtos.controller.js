@@ -41,6 +41,16 @@ function nomeProdutoValido(nome) {
   );
 }
 
+function corVariacaoValida(cor) {
+  const corTratada = String(cor || "").trim();
+
+  return (
+    corTratada.length >= 3 &&
+    /[\p{L}]/u.test(corTratada) &&
+    /^[\p{L} \-/.]+$/u.test(corTratada)
+  );
+}
+
 async function listarProdutos(req, res) {
   try {
     const produtos = await all(`
@@ -101,9 +111,9 @@ async function criarProduto(req, res) {
       });
     }
 
-    if (!cor) {
+    if (!corVariacaoValida(cor)) {
       return res.status(400).json({
-        message: "Cor da variação é obrigatória.",
+        message: "Informe uma cor válida para a variação.",
       });
     }
 
@@ -415,9 +425,9 @@ async function editarProduto(req, res) {
       });
     }
 
-    if (!cor) {
+    if (!corVariacaoValida(cor)) {
       return res.status(400).json({
-        message: "Cor da variação é obrigatória.",
+        message: "Informe uma cor válida para a variação.",
       });
     }
 
