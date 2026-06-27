@@ -61,7 +61,7 @@ public class CadastroProdutoTest {
     //}
 
     @Test
-    public void CT02_cadastrarProdutoValido() {
+    public void CT03_cadastrarProdutoValido() {
         // Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();
@@ -84,6 +84,7 @@ public class CadastroProdutoTest {
                 estoqueMinimo
         );
 
+        //E: Clicar no botão cadastrar produto
         clicarBotaoCadastrarProduto();
 
         // Então: o sistema deve exibir mensagem de sucesso
@@ -97,7 +98,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT03_editarProdutoValido() {
+    public void CT04_editarProdutoValido() {
         // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
 
@@ -124,12 +125,12 @@ public class CadastroProdutoTest {
         // E: o novo preço deve ser persistido no banco
         assertTrue(
                 "O preço editado não foi encontrado no banco de dados.",
-                ProdutoDAO.produtoPossuiPreco(sku, novoPreco)
+                ProdutoDAO.existeProdutoComPreco(sku, novoPreco)
         );
     }
 
     @Test
-    public void CT04_excluirProdutoValido() {
+    public void CT05_excluirProdutoValido() {
         // Dado: que exista um produto cadastrado para exclusão
         String sku = cadastrarProdutoParaTeste();
 

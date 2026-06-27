@@ -66,7 +66,7 @@ public class ProdutoDAO {
                FROM variacao_produto 
                WHERE sku = ? 
                  AND CAST(preco AS REAL) = ?
-                    """;
+               """;
 
         try (Connection conexao = conectar();
              PreparedStatement statement = conexao.prepareStatement(sql)) {
@@ -90,28 +90,6 @@ public class ProdutoDAO {
         return false;
     }
 
-    public static boolean produtoPossuiPreco(String sku, String precoEsperado) {
-        String sql = """
-             SELECT COUNT(*)
-            FROM variacao_produto
-            WHERE sku = ?
-            AND CAST(preco AS REAL) = ?
-            """;
-
-        try (Connection conexao = DriverManager.getConnection(URL_BANCO);
-             PreparedStatement stmt = conexao.prepareStatement(sql)) {
-
-            stmt.setString(1, sku);
-            stmt.setBigDecimal(2, new BigDecimal(precoEsperado));
-
-            ResultSet resultado = stmt.executeQuery();
-
-            return resultado.next() && resultado.getInt(1) > 0;
-
-        } catch (SQLException erro) {
-            throw new RuntimeException("Erro ao consultar preço do produto no banco.", erro);
-        }
-    }
 
     public static boolean produtoEstaAtivoPorSku(String sku) {
         String sql = """

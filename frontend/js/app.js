@@ -1207,7 +1207,7 @@ function validarFormularioProduto() {
   if (!sku) {
     return {
       valido: false,
-      mensagem: "Informe o SKU da variação.",
+      mensagem: "Informe um sku válido para a variação.",
     };
   }
 

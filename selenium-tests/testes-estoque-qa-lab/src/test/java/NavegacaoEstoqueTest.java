@@ -22,7 +22,7 @@ public class NavegacaoEstoqueTest {
 
     @After
     public void finalizarTeste() {
-      driver.quit();
+     driver.quit();
     }
 
     @Test

@@ -6,7 +6,15 @@ public class MassaCadastroProduto {
     private static final Faker faker = new Faker();
 
     public static String nomeProdutoValido() {
-        return "Camiseta " + faker.number().numberBetween(100, 999);
+        return "Camiseta" + faker.number().numberBetween(100, 999);
+    }
+
+    public static String nomeVazio(){
+        return "";
+    }
+
+    public static String nomeAbaixoMinimo(){
+        return "CA";
     }
 
     public static String corValida() {
@@ -21,8 +29,25 @@ public class MassaCadastroProduto {
         return "CAM" + System.currentTimeMillis() + "-AZUL-M";
     }
 
+    public static String skuFormatoInvalido() {
+        return "1";
+    }
+
+    public static String skuVazio() {
+        return "";
+    }
+
+
+    public static String skuComEspaco() {
+        return "CAM AZUL M";
+    }
+
     public static String precoValido() {
         return "59.90";
+    }
+
+    public static String precoFormatoInvalido() {
+        return "0.00";
     }
 
     public static String quantidadeInicialValida() {
