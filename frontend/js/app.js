@@ -732,6 +732,17 @@ function normalizarTexto(valor) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function nomeProdutoValido(nome) {
+  const nomeTratado = String(nome || "").trim();
+
+  return (
+    nomeTratado.length >= 3 &&
+    nomeTratado.length <= 30 &&
+    /[\p{L}]/u.test(nomeTratado) &&
+    /^[\p{L}\p{N} \-/.()%]+$/u.test(nomeTratado)
+  );
+}
+
 function obterStatusFiltroProduto(produto) {
   const quantidade = Number(produto.quantidade);
   const estoqueMinimo = Number(produto.estoqueMinimo);
@@ -1183,7 +1194,7 @@ function validarFormularioProduto() {
   const estoqueMinimo =
     estoqueMinimoCampo === "" ? null : Number(estoqueMinimoCampo);
 
-  if (!nome) {
+  if (!nomeProdutoValido(nome)) {
     return {
       valido: false,
       mensagem: "Informe um nome de produto válido.",

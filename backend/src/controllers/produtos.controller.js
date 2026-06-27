@@ -30,6 +30,17 @@ function normalizarTexto(valor) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function nomeProdutoValido(nome) {
+  const nomeTratado = String(nome || "").trim();
+
+  return (
+    nomeTratado.length >= 3 &&
+    nomeTratado.length <= 30 &&
+    /[\p{L}]/u.test(nomeTratado) &&
+    /^[\p{L}\p{N} \-/.()%]+$/u.test(nomeTratado)
+  );
+}
+
 async function listarProdutos(req, res) {
   try {
     const produtos = await all(`
@@ -84,9 +95,9 @@ async function criarProduto(req, res) {
       : Number(estoqueMinRaw);
 
   try {
-    if (!nome) {
+    if (!nomeProdutoValido(nome)) {
       return res.status(400).json({
-        message: "Nome do produto é obrigatório.",
+        message: "Informe um nome de produto válido.",
       });
     }
 
@@ -398,9 +409,9 @@ async function editarProduto(req, res) {
 
     const produtoEncontrado = produtoAtual[0];
 
-    if (!nome) {
+    if (!nomeProdutoValido(nome)) {
       return res.status(400).json({
-        message: "Nome do produto é obrigatório.",
+        message: "Informe um nome de produto válido.",
       });
     }
 
