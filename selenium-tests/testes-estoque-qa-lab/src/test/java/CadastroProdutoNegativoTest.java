@@ -1,5 +1,6 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import massas.MassaCadastroProduto;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
@@ -46,7 +47,11 @@ public class CadastroProdutoNegativoTest {
                         .PG_CADASTRO_PRODUTO_ATIVA).isDisplayed());
     }
 
-
+    @After
+    public void finalizarTeste() {
+        driver.quit();
+    }
+    
     @Test
     public void CT01_CadCampoNomeVazio(){
         //Dado: que o usuário esteja na tela de cadastro

@@ -1,6 +1,7 @@
 import database.ProdutoDAO;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import massas.MassaCadastroProduto;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Alert;
@@ -54,11 +55,10 @@ public class CadastroProdutoTest {
                         .isDisplayed()
         );
     }
-
-    //@After
-   // public void finalizarTeste() {
-    //    driver.quit();
-    //}
+    @After
+   public void finalizarTeste() {
+     driver.quit();
+    }
 
     @Test
     public void CT03_cadastrarProdutoValido() {
