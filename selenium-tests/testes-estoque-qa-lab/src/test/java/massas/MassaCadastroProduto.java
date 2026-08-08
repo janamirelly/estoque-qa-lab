@@ -18,15 +18,15 @@ public class MassaCadastroProduto {
     }
 
     public static String corValida() {
-        return "Azul";
+        return "Verde Oliva";
     }
 
     public static String tamanhoValido() {
-        return "M";
+        return "P";
     }
 
     public static String skuValido() {
-        return "CAM" + System.currentTimeMillis() + "-AZUL-M";
+        return "CAM" + System.currentTimeMillis() + "-VO-P";
     }
 
     public static String skuFormatoInvalido() {
@@ -43,7 +43,7 @@ public class MassaCadastroProduto {
     }
 
     public static String precoValido() {
-        return "59.90";
+        return "69.90";
     }
 
     public static String precoFormatoInvalido() {
@@ -51,7 +51,7 @@ public class MassaCadastroProduto {
     }
 
     public static String quantidadeInicialValida() {
-        return "20";
+        return "0";
     }
 
     public static String estoqueMinimoValido() {

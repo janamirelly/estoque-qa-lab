@@ -1,3 +1,4 @@
+import database.ProdutoDAO;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import massas.MassaCadastroProduto;
 import org.junit.After;
@@ -15,6 +16,7 @@ import variaveis.VariaveisEstoque;
 
 import java.time.Duration;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CadastroProdutoNegativoTest {
@@ -47,10 +49,10 @@ public class CadastroProdutoNegativoTest {
                         .PG_CADASTRO_PRODUTO_ATIVA).isDisplayed());
     }
 
-    @After
-    public void finalizarTeste() {
-        driver.quit();
-    }
+    //@After
+   // public void finalizarTeste() {
+    //    driver.quit();
+    //}
     
     @Test
     public void CT01_CadCampoNomeVazio(){
@@ -112,6 +114,37 @@ public class CadastroProdutoNegativoTest {
 
         //Então: O sistema deve exibir a mensagem de erro
         validarMensFeedback(MS_SKU_INVALIDO);
+
+    }
+
+    @Test
+    public void CT03_bloquearCadastroNomeAbaixoLimiteMinimo(){
+        //Dado: que o usuário esteja na tela de cadastro
+        String nomeProduto = MassaCadastroProduto.nomeAbaixoMinimo();
+        String cor = MassaCadastroProduto.corValida();
+        String sku = MassaCadastroProduto.skuValido();
+        String tamanho = MassaCadastroProduto.tamanhoValido();
+        String preco = MassaCadastroProduto.precoValido();
+        String qtd = MassaCadastroProduto.quantidadeInicialValida();
+        String estoqueMinimo = MassaCadastroProduto.estoqueMinimoValido();
+
+        //Quando: preencher campo nome do produto abaixo do limite mínimo
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                sku,
+                tamanho,
+                preco,
+                qtd,
+                estoqueMinimo
+        );
+        clicarBotaoCadastrarProduto();
+
+        //Então o sistema deve exibir a mensagem de erro
+        validarMensFeedback(MS_PRODUTO_INVALIDO);
+
+        assertFalse("O produto com nome abaixo do limite mínimo foi persistido no banco.",
+                 ProdutoDAO.existeProdutoPorSku(sku));
 
     }
 

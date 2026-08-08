@@ -1,4 +1,4 @@
-# CT-UI-001 — Bloquear cadastro com nome abaixo do limite mínimo
+# CT03 — Bloquear cadastro com nome abaixo do limite mínimo
 
 ## Identificação
 
