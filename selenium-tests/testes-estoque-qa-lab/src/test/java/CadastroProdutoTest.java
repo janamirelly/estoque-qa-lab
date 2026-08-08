@@ -61,7 +61,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT03_cadastrarProdutoValido() {
+    public void CT04_cadastrarProdutoValido() {
         // Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();
@@ -98,7 +98,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT04_editarProdutoValido() {
+    public void CT05_editarProdutoValido() {
         // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
 
@@ -130,7 +130,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT05_excluirProdutoValido() {
+    public void CT06_excluirProdutoValido() {
         // Dado: que exista um produto cadastrado para exclusão
         String sku = cadastrarProdutoParaTeste();
 
