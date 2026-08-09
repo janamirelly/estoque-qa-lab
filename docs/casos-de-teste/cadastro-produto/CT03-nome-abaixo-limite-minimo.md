@@ -34,7 +34,7 @@ Verificar se o sistema impede o cadastro de produto quando o campo **Nome do pro
 | Quantidade inicial | `0`           |
 | Estoque mínimo     | `10`          |
 
-## Passos e resultados esperados
+## Passos 
 1. Acessar a aplicação Estoque QA Lab.
 2. Navegar até a tela **Cadastrar Produto**.
 3. Confirmar no banco de dados que o SKU definido na massa de teste não está cadastrado.
