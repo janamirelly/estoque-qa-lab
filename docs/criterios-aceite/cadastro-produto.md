@@ -16,3 +16,14 @@ E clicar em **Cadastrar produto**
 Então o sistema deve concluir o cadastro com sucesso
 E deve exibir a mensagem `Produto cadastrado com sucesso`
 E o produto deve ser cadastrado
+
+## CA-003 — Permitir alteração do estoque mínimo
+
+Dado: que exista uma variação de produto cadastrada
+E que o usuário esta na tela **Consultar estoque**
+E clicar no botão **Editar**
+Quando informar um valor válido para o campo **Estoque mínimo**
+E clicar no botão **Salvar alterações**
+Então o sistema deve concluir a atualização com sucesso
+E deve exibir a mensagem `Alteração salva com sucesso `
+E o novo valor de estoque mínimo deve ser persistido

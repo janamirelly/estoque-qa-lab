@@ -60,31 +60,32 @@ public class ProdutoDAO {
         return false;
     }
 
-    public static boolean existeProdutoComPreco(String sku, String precoEsperado) {
+    public static boolean existeProdutoComEstoqueMinimo(String sku, String novoEstoqueMinimo) {
         String sql = """
-               SELECT COUNT(*) 
-               FROM variacao_produto 
-               WHERE sku = ? 
-                 AND CAST(preco AS REAL) = ?
-               """;
+            SELECT COUNT(*)
+            FROM variacao_produto vp
+            INNER JOIN estoque e
+                ON e.id_variacao = vp.id_variacao
+            WHERE vp.sku = ?
+              AND e.estoque_min = ?
+            """;
 
         try (Connection conexao = conectar();
              PreparedStatement statement = conexao.prepareStatement(sql)) {
 
             statement.setString(1, sku);
-            statement.setDouble(2, Double.parseDouble(precoEsperado));
+            statement.setInt(2, Integer.parseInt(novoEstoqueMinimo));
 
             try (ResultSet resultado = statement.executeQuery()) {
                 if (resultado.next()) {
-                    int quantidadeEncontrada = resultado.getInt(1);
-                    return quantidadeEncontrada > 0;
+                    return resultado.getInt(1) > 0;
                 }
             }
 
         } catch (Exception erro) {
             throw new RuntimeException
-                    ("Erro ao consultar produto editado" +
-                            " por SKU e preço!", erro);
+                    ("Erro ao consultar estoque minímo por SKU"
+                            , erro);
         }
 
         return false;

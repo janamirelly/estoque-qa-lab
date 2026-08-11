@@ -74,7 +74,7 @@ public class MassaCadastroProduto {
         return "";
     }
 
-    public static String novoPrecoValidoEdicao() {
-        return "69.90";
+    public static String novoEstoqueMinimoValidoEdicao() {
+        return "12";
     }
 }

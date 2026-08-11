@@ -204,20 +204,40 @@ async function criarProduto(req, res) {
       });
     }
 
+    const produtosExistentes = await all(`
+            SELECT id_produto, nome
+            FROM produto
+            WHERE ativo = 1
+          `);
+
+    const produtoExistente = produtosExistentes.find(
+      (item) => normalizarTexto(item.nome) === normalizarTexto(nome),
+    );
+
     await run("BEGIN TRANSACTION");
 
     try {
-      const produtoCriado = await run(
-        `
-    INSERT INTO produto (
-      nome,
-      descricao,
-      ativo
-    )
-    VALUES (?, NULL, 1)
-  `,
-        [nome],
-      );
+      let idProduto;
+      let produtoFoiCriado = false;
+
+      if (produtoExistente) {
+        idProduto = produtoExistente.id_produto;
+      } else {
+        const produtoCriado = await run(
+          `
+        INSERT INTO produto (
+            nome,
+            descricao,
+            ativo
+         )
+        VALUES (?, NULL, 1)
+         `,
+          [nome],
+        );
+
+        idProduto = produtoCriado.lastID;
+        produtoFoiCriado = true;
+      }
 
       const variacaoCriada = await run(
         `
@@ -234,7 +254,7 @@ async function criarProduto(req, res) {
           VALUES (?, ?, ?, ?, ?, ?, ?, 1)
         `,
         [
-          produtoCriado.lastID,
+          idProduto,
           cor,
           tamanho,
           corNormalizada,
@@ -287,10 +307,12 @@ async function criarProduto(req, res) {
           VALUES (?, ?, ?)
         `,
         [
-          "PRODUTO_CRIADO",
-          `produto:${produtoCriado.lastID}`,
+          produtoFoiCriado ? "PRODUTO_CRIADO" : "VARIACAO_CRIADA",
+          produtoFoiCriado
+            ? `produto:${idProduto}`
+            : `variacao:${variacaoCriada.lastID}`,
           JSON.stringify({
-            id_produto: produtoCriado.lastID,
+            id_produto: idProduto,
             id_variacao: variacaoCriada.lastID,
             nome,
             sku,
@@ -305,7 +327,7 @@ async function criarProduto(req, res) {
       return res.status(201).json({
         message: "Produto cadastrado com sucesso.",
         produto: {
-          id_produto: produtoCriado.lastID,
+          id_produto: idProduto,
           nome,
           ativo: 1,
         },

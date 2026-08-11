@@ -55,10 +55,10 @@ public class CadastroProdutoTest {
                         .isDisplayed()
         );
     }
-    @After
-   public void finalizarTeste() {
-     driver.quit();
-    }
+    //@After
+   //public void finalizarTeste() {
+    // driver.quit();
+    //}
 
     @Test
     public void CT04_cadastrarProdutoValido() {
@@ -98,13 +98,13 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT05_editarProdutoValido() {
+    public void CT05_alterarEstoqueMinimoValido() {
         // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
 
-        String novoPreco = MassaCadastroProduto.novoPrecoValidoEdicao();
+        String novoEstoqueMinimo = MassaCadastroProduto.novoEstoqueMinimoValidoEdicao();
 
-        // Quando: buscar o produto cadastrado na tela de estoque
+        // Quando: buscar o produto cadastrado
         acessarTelaConsultarEstoque();
         buscarProdutoPorSku(sku);
 
@@ -113,8 +113,8 @@ public class CadastroProdutoTest {
 
         aguardarTelaCadastroProduto();
 
-        // E: alterar o preço do produto
-        alterarPrecoProduto(novoPreco);
+        // E: alterar o estoque mínimo
+        alterarEstoqueMinimo(novoEstoqueMinimo);
 
         // E: clicar em Salvar alterações
         clicarBotaoSalvarAlteracoes();
@@ -122,10 +122,10 @@ public class CadastroProdutoTest {
         // Então: o sistema deve exibir mensagem de sucesso
         validarMensagemFeedback(MSG_ALTERACAO_SALVA);
 
-        // E: o novo preço deve ser persistido no banco
+        // E: o novo estoque mínimo deve ser persistido no banco
         assertTrue(
-                "O preço editado não foi encontrado no banco de dados.",
-                ProdutoDAO.existeProdutoComPreco(sku, novoPreco)
+                "O novo estoque mínimo não foi persistido no banco de dados.",
+                ProdutoDAO.existeProdutoComEstoqueMinimo(sku, novoEstoqueMinimo)
         );
     }
 
@@ -329,17 +329,17 @@ public class CadastroProdutoTest {
         ));
     }
 
-    private void alterarPrecoProduto(String novoPreco) {
+    private void alterarEstoqueMinimo(String novoEstoqueMinimo) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        WebElement campoPreco = wait.until(
+        WebElement campoEstoqueMinimo = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
-                        CadastroProduto.INPUT_PRECO
+                        CadastroProduto.INPUT_ESTOQUE_MIN
                 )
         );
 
-        campoPreco.clear();
-        campoPreco.sendKeys(novoPreco);
+        campoEstoqueMinimo.clear();
+        campoEstoqueMinimo.sendKeys(novoEstoqueMinimo);
     }
 
     private void clicarBotaoSalvarAlteracoes() {
