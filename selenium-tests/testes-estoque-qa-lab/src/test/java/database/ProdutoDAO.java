@@ -122,6 +122,36 @@ public class ProdutoDAO {
         return false;
     }
 
+    public static int obterIdProdutoPorSku(String sku) {
+        String sql = """
+            SELECT vp.id_produto
+            FROM variacao_produto vp
+            WHERE vp.sku = ?
+            """;
+
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
+
+            statement.setString(1, sku);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("id_produto");
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException(
+                    "Erro ao consultar id_produto por SKU.",
+                    erro
+            );
+        }
+
+        return -1;
+    }
+
+
+
 
 
 }

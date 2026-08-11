@@ -155,6 +155,90 @@ public class CadastroProdutoTest {
         );
     }
 
+    @Test
+    public void CT07_manterVariacoesMesmoProdutoVinculadasAoMesmoProduto() {
+
+        // Dado: duas variações diferentes pertencentes ao mesmo produto
+        String sufixo = String.valueOf(System.currentTimeMillis());
+
+        String nomeProduto = "Blusa Canelada " + sufixo;
+        String cor = "PRETA";
+
+        String tamanhoPrimeiraVariacao = "P";
+        String tamanhoSegundaVariacao = "M";
+
+        String skuPrimeiraVariacao =
+                "BLU" + sufixo + "-PRETA-P";
+
+        String skuSegundaVariacao =
+                "BLU" + sufixo + "-PRETA-M";
+
+        String preco = MassaCadastroProduto.precoValido();
+        String quantidadeInicial =
+                MassaCadastroProduto.quantidadeInicialValida();
+        String estoqueMinimo =
+                MassaCadastroProduto.estoqueMinimoValido();
+
+
+        // Quando: cadastrar a primeira variação
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                tamanhoPrimeiraVariacao,
+                skuPrimeiraVariacao,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        assertTrue(
+                "A primeira variação não foi persistida no banco.",
+                ProdutoDAO.existeProdutoPorSku(skuPrimeiraVariacao)
+        );
+
+
+        // Preparar o formulário para a segunda variação
+        acessarTelaCadastrarProduto();
+
+
+        // E: cadastrar uma segunda variação para o mesmo produto
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                tamanhoSegundaVariacao,
+                skuSegundaVariacao,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        assertTrue(
+                "A segunda variação não foi persistida no banco.",
+                ProdutoDAO.existeProdutoPorSku(skuSegundaVariacao)
+        );
+
+
+        // Então: ambas devem estar vinculadas ao mesmo id_produto
+        int idProdutoPrimeiraVariacao =
+                ProdutoDAO.obterIdProdutoPorSku(skuPrimeiraVariacao);
+
+        int idProdutoSegundaVariacao =
+                ProdutoDAO.obterIdProdutoPorSku(skuSegundaVariacao);
+
+        assertEquals(
+                "As variações do mesmo produto foram vinculadas a produtos diferentes.",
+                idProdutoPrimeiraVariacao,
+                idProdutoSegundaVariacao
+        );
+    }
+
+
     private String cadastrarProdutoParaTeste() {
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();
@@ -374,6 +458,17 @@ public class CadastroProdutoTest {
         assertTrue(
                 mensagemSucesso.getText().contains(mensagemEsperada)
         );
+    }
+    private void acessarTelaCadastrarProduto() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                ElementosEstoque.BOTAO_CADASTRO
+        )).click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA
+        ));
     }
 }
 
