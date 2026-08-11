@@ -88,10 +88,10 @@ ORDER BY vp.sku;
 ## Evidências do defeito
 
 - **EVD-001 — Variações apresentadas na interface:** diferentes SKUs são apresentadas para o produto `Calça Jeans`.
-  [Ver evidência](../evidencias/BUG-001/01-variacoes-calca-jeans-ui.png)
+  [Ver evidência](../evidencias/bug-001/01-variacoes-calca-jeans-ui.png)
 
 - **EVD-002 — Inconsistência no banco de dados:** as variações estão associadas a diferentes valores de `id_produto`.
-  [Ver evidência](../evidencias/BUG-001/02-ids-produto-distintos-banco.png)
+  [Ver evidência](../evidencias/bug-001/02-ids-produto-distintos-banco.png)
 
 ## Validação da correção
 
@@ -117,5 +117,5 @@ O comportamento está de acordo com a **RN-012 — Variações do mesmo produto 
 
 ### Evidência da correção
 
-- [Consulta após a correção](../evidencias/BUG-001/03-correcao-validada-banco.png)
+- [Consulta após a correção](../evidencias/bug-001/03-correcao-validada-banco.png)
 
