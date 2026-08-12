@@ -218,39 +218,69 @@ A consulta ao banco complementa a validação funcional. Ela é especialmente ú
 
 ---
 
-# Bug investigado — exclusão de produto
+## Bug investigado — variações vinculadas a produtos distintos
 
-Durante a validação da exclusão foi encontrada uma inconsistência entre frontend, API e banco de dados.
+Durante os testes de cadastro de variações foi identificada uma inconsistência no relacionamento entre produto e variação.
 
-### Resultado encontrado
+### Comportamento encontrado
 
-A exclusão foi executada pela API e retornou sucesso.
+Ao cadastrar diferentes variações de um mesmo produto, cada variação era vinculada a um `id_produto` diferente no banco de dados.
 
-Em seguida:
+Exemplo do comportamento encontrado:
 
-* a API indicou que a operação havia sido processada;
-* a consulta SQL confirmou que o registro já não existia;
-* o produto continuava aparecendo na interface.
+| Produto | SKU | id_produto |
+|---|---|---:|
+| Calça Jeans | `CAL-PRETA-P` | 10 |
+| Calça Jeans | `CAL-PRETA-M` | 13 |
+| Calça Jeans | `CAL-PRETA-G` | 11 |
+
+O comportamento esperado era que as três variações permanecessem vinculadas ao mesmo produto, mantendo apenas identificadores próprios de variação.
 
 ### Investigação
 
+A análise foi realizada comparando os dados exibidos na interface com o relacionamento persistido no banco:
+
 ```text
-DELETE
-   ↓
-API retorna sucesso
-   ↓
-Consulta SQL
-   ↓
-Registro não encontrado
-   ↓
-Frontend
-   ↓
-Produto continua exibido
+Cadastro das variações
+        ↓
+Consulta na interface
+        ↓
+Consulta SQL com JOIN
+        ↓
+Comparação dos id_produto
+        ↓
+Inconsistência identificada
+
 ```
+A consulta confirmou que variações pertencentes ao mesmo produto estavam associadas a registros diferentes na tabela de produtos.
 
-A comparação entre as três camadas mostrou que a exclusão do registro havia ocorrido e que a inconsistência estava relacionada à atualização das informações apresentadas pelo frontend.
+Impacto
 
-O caso foi registrado com evidências da API, banco de dados e interface.
+A inconsistência poderia afetar operações dependentes do relacionamento entre produto e variações, como:
+
+edição;
+exclusão/inativação;
+agrupamento das variações;
+consulta de estoque;
+movimentações;
+relatórios.
+Validação da correção
+
+Após o ajuste, o cenário foi executado novamente com duas variações do produto Blusa Canelada:
+
+BLU-PRETA-P;
+BLU-PRETA-M.
+
+A consulta no banco confirmou que ambas passaram a utilizar o mesmo id_produto.
+
+Resultado do reteste: aprovado.
+
+Ver bug report completo
+
+Evidências
+Interface com as variações
+Inconsistência identificada no banco
+Validação após a correção
 
 ---
 
