@@ -277,7 +277,9 @@ Resultado do reteste: aprovado.
 
 [Ver bug report completo](./docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md)
 
-[Evidencias](./docs/evidencias/bug-001-variacoes-mesmo-produto-ids-distintos.md)
+[evidencias](./docs/evidencias/bug-001/01-variacoes-mesmo-produto-ui.png/
+02-ids-produto-distintos-banco.png/
+03-correcao-validada-banco.png)
 
 
 ---
