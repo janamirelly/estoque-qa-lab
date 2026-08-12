@@ -277,9 +277,11 @@ Resultado do reteste: aprovado.
 
 [Ver bug report completo](./docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md)
 
-[evidencias](./docs/evidencias/bug-001/01-variacoes-mesmo-produto-ui.png/
-02-ids-produto-distintos-banco.png/
-03-correcao-validada-banco.png)
+### Evidências
+
+- [Evidência 1 — Interface](./docs/evidencias/bug-001/01-variacoes-mesmo-produto-ui.png)
+- [Evidência 2 — Banco de dados](./docs/evidencias/bug-001/02-ids-produto-distintos-banco.png)
+- [Evidência 3 — Correção validada](./docs/evidencias/bug-001/03-correcao-validada-banco.png)
 
 
 ---
