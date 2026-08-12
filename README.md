@@ -275,13 +275,9 @@ A consulta no banco confirmou que ambas passaram a utilizar o mesmo id_produto.
 
 Resultado do reteste: aprovado.
 
-Ver bug report completo
-docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md
+[Ver bug report completo](./docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md)
 
-Evidências: 
-docs/evidencias/bug-001/01-variacoes-mesmo-produto-ui.png
-docs/evidencias/bug-001/02-ids-produto-distintos-banco.png
-docs/evidencias/bug-001/03-correcao-validada-banco.png
+[Evidencias](./docs/evidencias/bug-001-variacoes-mesmo-produto-ids-distintos.md)
 
 
 ---
