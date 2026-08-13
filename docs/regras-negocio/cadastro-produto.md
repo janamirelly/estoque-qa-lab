@@ -198,7 +198,7 @@ O estoque mínimo deve:
 A quantidade atual em estoque não deve ser alterada por meio da edição do cadastro do produto, 
 pois alterações de quantidade devem ocorrer por movimentações de estoque.
 
-## RN-012 — Variações do mesmo produto devem permanecer vinculadas ao produto de origem
+## RN-012 — Vínculo produto/variações
 
 Um produto pode possuir uma ou mais variações.
 
