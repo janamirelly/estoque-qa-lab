@@ -146,7 +146,7 @@ Os cenários em Gherkin são utilizados para documentar comportamentos esperados
 
 ---
 
-# Testes de API
+## Testes de API
 
 Os endpoints do módulo são validados com **Postman**.
 
@@ -237,7 +237,7 @@ Inconsistência identificada
 ```
 A consulta confirmou que variações pertencentes ao mesmo produto estavam associadas a registros diferentes na tabela de produtos.
 
-Impacto
+### Impacto
 
 A inconsistência poderia afetar operações dependentes do relacionamento entre produto e variações, como:
 
@@ -247,7 +247,8 @@ agrupamento das variações;
 consulta de estoque;
 movimentações;
 relatórios.
-Validação da correção
+
+### Validação da correção
 
 Após o ajuste, o cenário foi executado novamente com duas variações do produto Blusa Canelada:
 
