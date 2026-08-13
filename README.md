@@ -1,13 +1,32 @@
-# VarejoSync — Estoque QA
+# VarejoSync — Módulo de Estoque | Portfólio QA
 
-Projeto de Quality Assurance aplicado ao módulo de estoque do **VarejoSync**, com testes funcionais, API REST, validações em banco de dados e automação de interface.
+Portfólio de QA desenvolvido sobre o módulo de estoque do VarejoSync, com validações funcionais, testes de API REST, consultas SQL e automação de interface.
 
-A cobertura atual está concentrada em **cadastro e edição de produtos, regras de SKU e exclusão**, com validações realizadas no frontend, Postman e SQLite.
-
-**QA:** Postman · SQL · Java · Selenium WebDriver · JUnit
-**Aplicação:** HTML · CSS · JavaScript · Node.js · Express · SQLite
+A cobertura atual inclui cadastro e edição de produtos, regras de SKU, exclusão e investigação de inconsistências entre frontend, API e banco de dados.
 
 ---
+
+## Destaques do portfólio
+
+- [Cobertura de testes](./docs/cobertura-testes.md)
+- [Caso de teste — Cadastro de produto](./docs/casos-de-teste/cadastro-produto.md)
+- [Regra de negócio — Cadastro e SKU](./docs/regras-negocio/cadastro-produto.md)
+- [Bug report — Variações vinculadas a produtos distintos](./docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md)
+- [Automação de interface — Java, Selenium e JUnit](./selenium-tests/testes-estoque-qa-lab)
+
+## O que foi testado
+
+| Área | Cobertura desenvolvida |
+| --- | --- |
+| Cadastro | cadastro válido, campos obrigatórios, mensagem e persistência |
+| SKU | formato, obrigatoriedade, normalização e duplicidade |
+| Edição | busca, alteração, salvamento e resultado |
+| Exclusão | API, banco de dados e comportamento do frontend |
+| API | requisições, respostas, status HTTP e regras de negócio |
+| Banco de dados | persistência, consulta por SKU, alteração, exclusão e investigação |
+| Automação | tela inicial, cadastro positivo, edição e cenário negativo |
+
+Funcionalidades de movimentação, histórico e alertas também fazem parte do módulo, mas ainda não representam o foco principal da cobertura.
 
 ## Visualização do sistema
 
@@ -25,13 +44,6 @@ O módulo possui uma interface web utilizada na execução dos testes funcionais
 
 ![Cadastro de produto e variação](assets/screenshots/cadastro-produto.png)
 
-As principais telas envolvidas na cobertura atual são:
-
-* dashboard de estoque;
-* cadastro e consulta de produtos;
-* cadastro de variações;
-* edição de produtos;
-* consulta de estoque.
 
 ### Interface
 
@@ -41,39 +53,15 @@ As principais telas envolvidas na cobertura atual são:
 
 ---
 
-## O que foi testado
-
-| Área           | Cobertura desenvolvida                                             |
-| -------------- | ------------------------------------------------------------------ |
-| Cadastro       | cadastro válido, campos obrigatórios, mensagem e persistência      |
-| SKU            | formato, obrigatoriedade, normalização e duplicidade               |
-| Edição         | busca, alteração, salvamento e resultado                           |
-| Exclusão       | API, banco de dados e comportamento do frontend                    |
-| API            | requisições, respostas, status codes e regras de negócio           |
-| Banco de dados | persistência, consulta por SKU, alteração, exclusão e investigação |
-| Automação      | tela inicial, cadastro positivo, edição e cenário negativo         |
-
-Funcionalidades de movimentação, histórico e alertas também fazem parte do módulo, mas não representam o foco principal da cobertura atual.
-
----
-
 ## Contexto da aplicação
 
-O módulo de estoque faz parte do projeto **VarejoSync**, voltado ao contexto de varejo.
+O **VarejoSync** é um sistema web voltado à gestão de varejo. Este repositório concentra a validação do módulo de estoque.
 
-A aplicação utilizada nos testes possui:
+O módulo contempla cadastro e consulta de produtos e variações, edição, movimentações de entrada, saída e ajuste, alertas de estoque mínimo, histórico de movimentações e operações de exclusão pela API.
 
-* dashboard de estoque;
-* cadastro de produtos e variações;
-* consulta de produtos;
-* edição;
-* consulta de estoque;
-* movimentações de entrada, saída e ajuste;
-* alertas de estoque mínimo;
-* histórico de movimentações;
-* operações de exclusão pela API.
+A cobertura apresentada neste portfólio está concentrada nas funcionalidades já validadas e documentadas no repositório.
 
-O projeto não possui autenticação.
+A aplicação não possui autenticação.
 
 ---
 
@@ -105,11 +93,11 @@ API
 Banco de dados
 ```
 
-Esse processo foi utilizado, por exemplo, na investigação do problema encontrado durante a exclusão de produto.
+Esse fluxo também é utilizado quando uma validação exige verificar o comportamento além da interface, como em testes de persistência, exclusão e relacionamento entre produto e variações.
 
 ---
 
-# Regra de negócio em destaque — unicidade do SKU
+## Regra de negócio em destaque — unicidade do SKU
 
 Uma das regras analisadas com maior profundidade no projeto é a unicidade do SKU das variações.
 
@@ -135,13 +123,13 @@ Quando o SKU normalizado já estiver associado a outra variação, o cadastro de
 SKU já cadastrado para outra variação
 ```
 
-A validação também diferencia problemas de entrada de conflitos de negócio.
+A validação diferencia erro de entrada de conflito com um registro já existente.
 
-Um SKU que não atende ao formato definido representa uma entrada inválida. Um SKU válido em formato, mas já existente após a normalização, representa conflito com um recurso cadastrado.
+Um SKU fora do formato definido deve ser tratado como entrada inválida. Já um SKU válido em formato, mas existente após a normalização, deve ser tratado como conflito de negócio.
 
 ---
 
-## Exemplo em Gherkin
+### Exemplo em Gherkin
 
 ```gherkin
 Cenário: Impedir cadastro de SKU já existente
@@ -160,21 +148,18 @@ Os cenários em Gherkin são utilizados para documentar comportamentos esperados
 
 # Testes de API
 
-Os endpoints do módulo são testados com **Postman**.
+Os endpoints do módulo são validados com **Postman**.
 
-As validações incluem:
+As verificações incluem:
 
-* método HTTP;
-* endpoint;
-* payload da requisição;
-* status code;
-* corpo da resposta;
-* mensagens retornadas;
-* criação e alteração de registros;
-* entradas inválidas;
-* duplicidade;
-* exclusão;
-* estado do recurso após a operação.
+- método e endpoint;
+- payload da requisição;
+- status HTTP;
+- corpo e mensagens da resposta;
+- criação e alteração de registros;
+- entradas inválidas e conflitos de negócio;
+- exclusão;
+- estado do recurso após a operação.
 
 Entre os retornos analisados estão:
 
@@ -185,26 +170,24 @@ Entre os retornos analisados estão:
 409 Conflict
 ```
 
-O status code não é utilizado isoladamente para aprovar um teste.
+O status HTTP não é utilizado isoladamente para determinar o resultado do teste.
 
-A resposta é comparada com a regra de negócio e, quando necessário, o estado resultante também é conferido no banco de dados.
+A resposta é comparada com a regra de negócio e, quando necessário, o estado resultante da operação também é validado no banco de dados.
 
 ---
 
-# Validação em banco de dados
+## Validação em banco de dados
 
-O módulo utiliza **SQLite**.
-
-SQL é utilizado para confirmar o estado dos dados e apoiar a investigação dos testes.
+O módulo utiliza **SQLite**, consultado durante os testes para confirmar o estado dos dados e apoiar a investigação de inconsistências.
 
 As validações realizadas incluem:
 
-* busca por SKU;
-* confirmação de cadastro;
-* consulta após alteração;
-* confirmação de exclusão;
-* identificação de registros duplicados;
-* consulta de dados relacionados ao estoque.
+- consulta por SKU;
+- confirmação de persistência após cadastro;
+- conferência dos dados após alteração;
+- confirmação de exclusão;
+- investigação de registros duplicados;
+- consulta de dados relacionados ao estoque.
 
 ### Exemplo
 
@@ -214,31 +197,31 @@ FROM variacao_produto
 WHERE sku = 'CAM-AZUL-M';
 ```
 
-A consulta ao banco complementa a validação funcional. Ela é especialmente útil quando o comportamento apresentado no frontend precisa ser comparado ao resultado processado pela API.
+A consulta ao banco complementa a validação funcional quando é necessário comparar o comportamento apresentado no frontend com o estado persistido após uma operação da API.
 
 ---
 
 ## Bug investigado — variações vinculadas a produtos distintos
 
-Durante os testes de cadastro de variações foi identificada uma inconsistência no relacionamento entre produto e variação.
+Durante os testes de cadastro de variações, foi identificada uma inconsistência no relacionamento entre produto e variação.
 
-### Comportamento encontrado
+### Resultado obtido
 
-Ao cadastrar diferentes variações de um mesmo produto, cada variação era vinculada a um `id_produto` diferente no banco de dados.
-
-Exemplo do comportamento encontrado:
+Ao cadastrar diferentes variações de um mesmo produto, cada variação era associada a um `id_produto` diferente no banco de dados.
 
 | Produto | SKU | id_produto |
-|---|---|---:|
+| --- | --- | ---: |
 | Calça Jeans | `CAL-PRETA-P` | 10 |
 | Calça Jeans | `CAL-PRETA-M` | 13 |
 | Calça Jeans | `CAL-PRETA-G` | 11 |
 
-O comportamento esperado era que as três variações permanecessem vinculadas ao mesmo produto, mantendo apenas identificadores próprios de variação.
+### Resultado esperado
+
+As variações pertencentes ao mesmo produto deveriam permanecer associadas ao mesmo `id_produto`, mantendo identificadores próprios apenas para cada variação.
 
 ### Investigação
 
-A análise foi realizada comparando os dados exibidos na interface com o relacionamento persistido no banco:
+A análise comparou as informações apresentadas na interface com o relacionamento persistido no banco de dados:
 
 ```text
 Cadastro das variações
@@ -273,7 +256,7 @@ BLU-PRETA-M.
 
 A consulta no banco confirmou que ambas passaram a utilizar o mesmo id_produto.
 
-Resultado do reteste: aprovado.
+**Resultado do reteste: aprovado.**
 
 [Ver bug report completo](./docs/bugs/bug-001-variacoes-mesmo-produto-ids-distintos.md)
 
@@ -286,185 +269,102 @@ Resultado do reteste: aprovado.
 
 ---
 
-# Automação
+## Automação de interface
 
-Parte da cobertura funcional possui testes automatizados com:
+Parte da cobertura funcional do módulo foi automatizada com **Java, Selenium WebDriver e JUnit**.
 
-* **Java**;
-* **Selenium WebDriver**;
-* **JUnit**;
-* **IntelliJ IDEA**.
+Os testes automatizados foram desenvolvidos a partir de cenários funcionais previamente executados e conhecidos no fluxo da aplicação.
 
 ### Cenários automatizados
 
-#### Tela inicial
+| Cenário | Validação |
+| --- | --- |
+| Tela inicial | URL, título da página e seção ativa |
+| Cadastro positivo | preenchimento de dados válidos, cadastro e mensagem retornada pela aplicação |
+| Edição | busca do produto, alteração dos dados, salvamento e resultado da operação |
+| Cadastro negativo | tentativa de cadastro sem SKU e validação do comportamento retornado pela aplicação |
 
-Validação de:
+[Ver testes automatizados](./selenium-tests/testes-estoque-qa-lab)
 
-* URL;
-* título da página;
-* seção ativa.
+### Estrutura dos testes
 
-#### Cadastro positivo
+O código de automação está separado por responsabilidades, incluindo:
 
-```text
-Abrir aplicação
-→ acessar cadastro
-→ preencher dados válidos
-→ cadastrar
-→ aguardar retorno da interface
-→ validar mensagem
-```
-
-#### Edição
-
-```text
-Buscar produto
-→ editar dados
-→ salvar
-→ validar resultado
-```
-
-#### Cadastro negativo
-
-Cenário com tentativa de cadastro sem SKU e validação do comportamento retornado pela aplicação.
-
-A automação está sendo ampliada a partir de cenários funcionais já conhecidos e executados manualmente.
-
----
-
-## Estrutura da automação
-
-O código foi separado por responsabilidade, incluindo:
-
-* classes de teste;
-* elementos utilizados na interface;
-* massa de dados;
-* variáveis dos fluxos;
-* acesso ao banco de dados.
+- classes de teste;
+- elementos da interface;
+- massa de dados;
+- variáveis utilizadas nos fluxos;
+- acesso ao banco de dados.
 
 São utilizadas esperas explícitas com `WebDriverWait` para aguardar condições da interface antes das validações.
 
-As verificações são realizadas com assertions do JUnit.
+As verificações dos resultados são realizadas com assertions do JUnit.
 
 ---
 
-# Evidências e documentação
+## Documentação e evidências
 
-Os testes são acompanhados de evidências conforme o tipo de validação executada.
+Os testes são acompanhados de registros compatíveis com o tipo de validação executada, incluindo:
 
-Entre os registros utilizados estão:
+- evidências da interface;
+- requisições e respostas da API no Postman;
+- consultas SQL;
+- resultados encontrados no banco de dados;
+- mensagens apresentadas pela aplicação;
+- bug reports;
+- casos de teste e regras de negócio.
 
-* interface;
-* requisições no Postman;
-* respostas da API;
-* consultas SQL;
-* resultados encontrados no banco;
-* mensagens apresentadas pela aplicação.
+As evidências são utilizadas para relacionar o cenário executado ao resultado esperado e ao comportamento efetivamente encontrado.
 
-Uma evidência deve permitir relacionar:
+Os bugs documentados incluem informações necessárias para reprodução e análise, como:
 
-```text
-cenário executado
-        +
-resultado esperado
-        +
-resultado obtido
-```
+- contexto;
+- pré-condições;
+- passos para reprodução;
+- resultado esperado;
+- resultado obtido;
+- evidências;
+- informações adicionais de API ou banco quando aplicáveis.
 
-Os bugs são documentados com informações necessárias para reprodução:
-
-* título;
-* ambiente ou contexto;
-* pré-condições;
-* passos;
-* resultado esperado;
-* resultado obtido;
-* evidências;
-* informações adicionais de API ou banco quando necessárias.
+A documentação do projeto está organizada na pasta [`docs`](./docs).
 
 ---
 
-# Artefatos de QA
+## Tecnologias e ferramentas
 
-A documentação produzida no projeto inclui:
+### QA
 
-* regras de negócio;
-* critérios de aceite;
-* cenários de teste;
-* cenários em Gherkin;
-* testes positivos e negativos;
-* validações de API;
-* consultas SQL;
-* evidências;
-* bug reports;
-* testes automatizados.
+| Tecnologia / ferramenta | Uso no projeto |
+| --- | --- |
+| Postman | testes e validações de API REST |
+| SQL / SQLite | validação de persistência e investigação de dados |
+| Java | implementação dos testes automatizados |
+| Selenium WebDriver | automação da interface web |
+| JUnit | execução dos testes e assertions |
+| IntelliJ IDEA | desenvolvimento da automação |
+| Git / GitHub | versionamento, documentação e publicação do portfólio |
 
----
+### Aplicação testada
 
-# Tecnologias e ferramentas
-
-## QA
-
-| Tecnologia / ferramenta | Uso                                      |
-| ----------------------- | ---------------------------------------- |
-| Postman                 | testes de API                            |
-| SQL / SQLite            | validação e investigação de dados        |
-| Java                    | implementação da automação               |
-| Selenium WebDriver      | automação da interface                   |
-| JUnit                   | execução e assertions                    |
-| IntelliJ IDEA           | desenvolvimento dos testes automatizados |
-| Git / GitHub            | versionamento e documentação             |
-
-## Aplicação
-
-| Tecnologia | Uso                       |
-| ---------- | ------------------------- |
-| HTML       | estrutura da interface    |
-| CSS        | apresentação              |
+| Tecnologia | Uso |
+| --- | --- |
+| HTML | estrutura da interface |
+| CSS | apresentação da aplicação |
 | JavaScript | comportamento do frontend |
-| Node.js    | backend                   |
-| Express    | API                       |
-| SQLite     | persistência              |
+| Node.js | backend |
+| Express | API REST |
+| SQLite | persistência dos dados |
 
 ---
 
-# Status da cobertura
+## Próximas áreas de cobertura
 
-### Cobertura desenvolvida
+A evolução da cobertura está prevista para funcionalidades já existentes no módulo:
 
-```text
-Cadastro
-   +
-Variações / SKU
-   +
-Edição
-   +
-Exclusão
-   +
-API
-   +
-Banco de dados
-   +
-Automação funcional
-```
+- movimentações de entrada;
+- movimentações de saída;
+- ajustes de estoque;
+- histórico de movimentações;
+- alertas de estoque mínimo.
 
-### Próximas áreas de cobertura
-
-* movimentações de entrada;
-* movimentações de saída;
-* ajustes de estoque;
-* histórico de movimentações;
-* alertas de estoque mínimo.
-
-Essas funcionalidades já pertencem ao módulo, mas não são apresentadas neste README como cobertura concluída.
-
----
-
-# Projeto
-
-O **VarejoSync — Estoque QA** é o repositório de QA dedicado ao módulo de estoque do VarejoSync.
-
-A documentação registra os comportamentos validados, cenários executados, consultas utilizadas, bugs encontrados e testes automatizados desenvolvidos durante a evolução do módulo.
-
-
+Essas funcionalidades ainda não são apresentadas neste README como cobertura concluída.
