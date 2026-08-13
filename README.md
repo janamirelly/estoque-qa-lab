@@ -239,23 +239,23 @@ A consulta confirmou que variações pertencentes ao mesmo produto estavam assoc
 
 ### Impacto
 
-A inconsistência poderia afetar operações dependentes do relacionamento entre produto e variações, como:
+A inconsistência poderia afetar funcionalidades que dependem do relacionamento entre produto e suas variações, como:
 
-edição;
-exclusão/inativação;
-agrupamento das variações;
-consulta de estoque;
-movimentações;
-relatórios.
+- edição;
+- exclusão ou inativação;
+- agrupamento das variações;
+- consulta de estoque;
+- movimentações;
+- relatórios.
 
 ### Validação da correção
 
-Após o ajuste, o cenário foi executado novamente com duas variações do produto Blusa Canelada:
+Após o ajuste, o cenário foi executado novamente utilizando duas variações do produto **Blusa Canelada**:
 
-BLU-PRETA-P;
-BLU-PRETA-M.
+- `BLU-PRETA-P`;
+- `BLU-PRETA-M`.
 
-A consulta no banco confirmou que ambas passaram a utilizar o mesmo id_produto.
+A consulta ao banco confirmou que ambas passaram a utilizar o mesmo `id_produto`.
 
 **Resultado do reteste: aprovado.**
 
