@@ -106,7 +106,7 @@ com a mensagem:
 `Informe um SKU válido para a variação.`
 
 
-##RN-005 — SKU da variação deve ser único
+## RN-005 — SKU da variação deve ser único
 
 - O sistema não deve permitir o cadastro de duas variações com o mesmo **SKU**.
 - Antes da comparação, o sistema deve remover espaços no início e no fim do **SKU**.
