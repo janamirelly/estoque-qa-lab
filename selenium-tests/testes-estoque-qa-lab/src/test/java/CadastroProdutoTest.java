@@ -98,7 +98,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT05_alterarEstoqueMinimoValido() {
+    public void CT_EST_EDT_001_alterarEstoqueMinimoDaVariacao() {
         // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
 
