@@ -32,7 +32,7 @@ O novo estoque mínimo utilizado na automação é obtido por:
 
 ## Passos
 
-1. Acessar a aplicação Estoque QA Lab.
+1. Acessar a aplicação VarejoSynd Estoque QA.
 2. Garantir a existência de um produto válido cadastrado para o teste.
 3. Navegar até a tela de consulta de estoque.
 4. Pesquisar o produto pelo SKU.
