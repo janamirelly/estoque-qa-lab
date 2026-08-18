@@ -33,7 +33,7 @@ Exemplos:
 | CT-EST-CAD-003 | RN-001 | CA-001 | Cadastro            | Bloquear nome com 2 caracteres      | Negativo | Sim       | Passou* |
 | CT-EST-CAD-004 | RN-010 | CA-010 | Cadastro            | Cadastrar produto com dados válidos | Positivo | Sim       | Passou* |
 | CT-EST-EDT-001 | RN-011 | CA-011 | Edição              | Alterar estoque mínimo da variação  | Positivo | Sim       | Passou* |
-| CT-EST-EXC-001 | —      | —      | Exclusão/Inativação | Excluir produto existente           | Positivo | Sim       | Passou* |
+| CT-EST-EXC-001 | RN-013 | CA-013 | Inativação de variação | Inativar somente a variação selecionada | Positivo | Parcial | Falhou |
 
 > **Observação:** o status de execução está registrado manualmente neste documento. A evolução prevista é obter o resultado diretamente do relatório de execução automatizada, com identificação da execução e data correspondente.
 

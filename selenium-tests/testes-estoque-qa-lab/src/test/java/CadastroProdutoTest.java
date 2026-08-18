@@ -130,7 +130,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT06_excluirProdutoValido() {
+    public void  CT_EST_EXC_001_excluirProdutoExistente() {
         // Dado: que exista um produto cadastrado para exclusão
         String sku = cadastrarProdutoParaTeste();
 
