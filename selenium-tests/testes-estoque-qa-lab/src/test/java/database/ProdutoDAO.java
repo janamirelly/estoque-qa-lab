@@ -178,6 +178,34 @@ public class ProdutoDAO {
         return false;
     }
 
+    public static int obterIdVariacaoPorSku(String sku) {
+        String sql = """
+        SELECT id_variacao
+        FROM variacao_produto
+        WHERE sku = ?
+        """;
+
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
+
+            statement.setString(1, sku);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("id_variacao");
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException(
+                    "Erro ao consultar id_variacao por SKU.",
+                    erro
+            );
+        }
+
+        return -1;
+    }
+
 
 
 

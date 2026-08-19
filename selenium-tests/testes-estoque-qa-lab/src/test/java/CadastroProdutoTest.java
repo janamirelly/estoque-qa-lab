@@ -276,7 +276,7 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void CT07_manterVariacoesMesmoProdutoVinculadasAoMesmoProduto() {
+    public void CT_EST_VAR_001_manterVariacoesDoMesmoProdutoVinculadas() {
 
         // Dado: duas variações diferentes pertencentes ao mesmo produto
         String sufixo = String.valueOf(System.currentTimeMillis());
@@ -355,6 +355,28 @@ public class CadastroProdutoTest {
                 "As variações do mesmo produto foram vinculadas a produtos diferentes.",
                 idProdutoPrimeiraVariacao,
                 idProdutoSegundaVariacao
+        );
+
+        int idVariacaoP =
+                ProdutoDAO.obterIdVariacaoPorSku(skuPrimeiraVariacao);
+
+        int idVariacaoM =
+                ProdutoDAO.obterIdVariacaoPorSku(skuSegundaVariacao);
+
+        assertTrue(
+                "A primeira variação não possui um id_variacao válido.",
+                idVariacaoP > 0
+        );
+
+        assertTrue(
+                "A segunda variação não possui um id_variacao válido.",
+                idVariacaoM > 0
+        );
+
+        assertNotEquals(
+                "As duas variações receberam o mesmo id_variacao.",
+                idVariacaoP,
+                idVariacaoM
         );
     }
 

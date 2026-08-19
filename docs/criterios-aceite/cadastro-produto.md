@@ -168,7 +168,7 @@ E a quantidade atual em estoque não deve ser alterada.
 
 ## CA-012 — Deve manter as variações vinculadas ao mesmo produto
 
-**Regra relacionada:** RN-012 — Variações do mesmo produto devem permanecer vinculadas ao produto de origem
+**Regra relacionada:** ** RN-012 — Vínculo produto/variações
 
 Dado que existe um produto cadastrado com uma variação
 Quando uma nova variação válida for cadastrada para o mesmo produto
