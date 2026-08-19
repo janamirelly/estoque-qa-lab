@@ -28,8 +28,8 @@ public class CadastroProdutoTest {
     private static final String MSG_ALTERACAO_SALVA =
             "Alteração salva com sucesso";
 
-    private static final String MSG_PRODUTO_EXCLUIDO =
-            "Produto excluído com sucesso";
+    private static final String MSG_VARIACAO_EXCLUIDA =
+            "Variação excluída com sucesso";
 
     @Before
     public void iniciarTeste() {
@@ -130,29 +130,149 @@ public class CadastroProdutoTest {
     }
 
     @Test
-    public void  CT_EST_EXC_001_excluirProdutoExistente() {
-        // Dado: que exista um produto cadastrado para exclusão
-        String sku = cadastrarProdutoParaTeste();
+    public void CT_EST_EXC_001_inativarSomenteVariacaoSelecionada() {
 
-        // Quando: buscar o produto cadastrado na tela de estoque
+        // Dado: um produto com duas variações ativas
+        String sufixo = String.valueOf(System.currentTimeMillis());
+
+        String nomeProduto = "Blusa " + sufixo;
+        String cor = "PRETA";
+
+        String skuVariacaoP =
+                "BLU" + sufixo + "-PRETA-P";
+
+        String skuVariacaoM =
+                "BLU" + sufixo + "-PRETA-M";
+
+        String preco = MassaCadastroProduto.precoValido();
+        String quantidadeInicial =
+                MassaCadastroProduto.quantidadeInicialValida();
+        String estoqueMinimo =
+                MassaCadastroProduto.estoqueMinimoValido();
+
+
+        // Cadastrar primeira variação - P
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                "P",
+                skuVariacaoP,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        assertTrue(
+                "A variação P não foi persistida no banco.",
+                ProdutoDAO.existeProdutoPorSku(skuVariacaoP)
+        );
+
+
+        // Cadastrar segunda variação - M
+        acessarTelaCadastrarProduto();
+
+        preencherFormularioProduto(
+                nomeProduto,
+                cor,
+                "M",
+                skuVariacaoM,
+                preco,
+                quantidadeInicial,
+                estoqueMinimo
+        );
+
+        clicarBotaoCadastrarProduto();
+
+        validarMensagemFeedback(MSG_PRODUTO_CADASTRADO);
+
+        assertTrue(
+                "A variação M não foi persistida no banco.",
+                ProdutoDAO.existeProdutoPorSku(skuVariacaoM)
+        );
+
+
+        // Confirmar que ambas pertencem ao mesmo produto
+        int idProdutoVariacaoP =
+                ProdutoDAO.obterIdProdutoPorSku(skuVariacaoP);
+
+        int idProdutoVariacaoM =
+                ProdutoDAO.obterIdProdutoPorSku(skuVariacaoM);
+
+        assertEquals(
+                "As variações não estão vinculadas ao mesmo produto.",
+                idProdutoVariacaoP,
+                idProdutoVariacaoM
+        );
+
+
+        // Confirmar pré-condições no banco
+        assertTrue(
+                "O produto de origem deveria estar ativo antes da exclusão.",
+                ProdutoDAO.produtoEstaAtivoPorSku(skuVariacaoM)
+        );
+
+        assertTrue(
+                "A variação P deveria estar ativa antes da exclusão.",
+                ProdutoDAO.variacaoEstaAtivaPorSku(skuVariacaoP)
+        );
+
+        assertTrue(
+                "A variação M deveria estar ativa antes da exclusão.",
+                ProdutoDAO.variacaoEstaAtivaPorSku(skuVariacaoM)
+        );
+
+
+        // Quando: excluir somente a variação M
         acessarTelaConsultarEstoque();
-        buscarProdutoPorSku(sku);
-        validarProdutoExibidoNaTabela(sku);
 
-        // E: clicar em Excluir
+        buscarProdutoPorSku(skuVariacaoM);
+
+        validarProdutoExibidoNaTabela(skuVariacaoM);
+
         clicarBotaoExcluirProduto();
 
-        // E: confirmar a exclusão no alerta do navegador
         confirmarExclusaoProduto();
 
-        // Então: o sistema deve exibir mensagem de sucesso da exclusão
-        validarMensagemFeedback(MSG_PRODUTO_EXCLUIDO);
 
-        // E: o produto não deve mais ser encontrado no banco de dados
-        assertFalse(
-                "O produto excluído continua ativo no banco de dados.",
-                ProdutoDAO.produtoEstaAtivoPorSku(sku)
+        // Então: deve apresentar mensagem correta
+        validarMensagemFeedback(MSG_VARIACAO_EXCLUIDA);
+
+
+        // E: o produto pai deve permanecer ativo
+        assertTrue(
+                "O produto de origem foi inativado indevidamente.",
+                ProdutoDAO.produtoEstaAtivoPorSku(skuVariacaoM)
         );
+
+
+        // E: somente a variação M deve ficar inativa
+        assertFalse(
+                "A variação selecionada permaneceu ativa.",
+                ProdutoDAO.variacaoEstaAtivaPorSku(skuVariacaoM)
+        );
+
+
+        // E: a variação P deve continuar ativa
+        assertTrue(
+                "A variação não selecionada foi inativada indevidamente.",
+                ProdutoDAO.variacaoEstaAtivaPorSku(skuVariacaoP)
+        );
+
+
+        // E: a variação M não deve mais aparecer na UI
+        buscarProdutoPorSku(skuVariacaoM);
+
+        validarProdutoNaoExibidoNaTabela(skuVariacaoM);
+
+
+        // E: a variação P deve continuar disponível na UI
+        buscarProdutoPorSku(skuVariacaoP);
+
+        validarProdutoExibidoNaTabela(skuVariacaoP);
     }
 
     @Test
@@ -361,6 +481,22 @@ public class CadastroProdutoTest {
 
         assertTrue(
                 "O produto buscado não apareceu na tabela.",
+                tabela.getText().contains(sku)
+        );
+    }
+
+    private void validarProdutoNaoExibidoNaTabela(String sku) {
+        WebDriverWait wait =
+                new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement tabela = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        ElementosEstoque.TABELA_ESTOQUE
+                )
+        );
+
+        assertFalse(
+                "A variação inativada continua sendo exibida na tabela.",
                 tabela.getText().contains(sku)
         );
     }

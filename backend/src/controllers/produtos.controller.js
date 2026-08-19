@@ -680,13 +680,14 @@ async function deletarProduto(req, res) {
       });
     }
 
-    const produtoAtual = await all(
+    const variacaoAtual = await all(
       `
         SELECT
           p.id_produto,
           p.nome,
-          p.ativo,
+          p.ativo AS produto_ativo,
           vp.id_variacao,
+          vp.ativo AS variacao_ativa,
           vp.cor,
           vp.tamanho,
           vp.sku,
@@ -695,38 +696,49 @@ async function deletarProduto(req, res) {
         FROM variacao_produto vp
         INNER JOIN produto p
           ON p.id_produto = vp.id_produto
-        INNER JOIN estoque e
+        LEFT JOIN estoque e
           ON e.id_variacao = vp.id_variacao
         WHERE vp.id_variacao = ?
       `,
       [idVariacao],
     );
 
-    if (produtoAtual.length === 0) {
+    if (variacaoAtual.length === 0) {
       return res.status(404).json({
-        message: "Produto não encontrado para exclusão.",
+        message: "Variação não encontrada para exclusão.",
       });
     }
 
-    const produtoEncontrado = produtoAtual[0];
+    const variacaoEncontrada = variacaoAtual[0];
 
-    if (Number(produtoEncontrado.ativo) === 0) {
-      return res.status(400).json({
-        message: "Produto já está excluído.",
+    if (Number(variacaoEncontrada.produto_ativo) === 0) {
+      return res.status(409).json({
+        message: "Produto de origem está inativo.",
+      });
+    }
+
+    if (Number(variacaoEncontrada.variacao_ativa) === 0) {
+      return res.status(409).json({
+        message: "Variação já está excluída.",
       });
     }
 
     await run("BEGIN TRANSACTION");
 
     try {
-      await run(
+      const resultadoAtualizacao = await run(
         `
-          UPDATE produto
+          UPDATE variacao_produto
           SET ativo = 0
-          WHERE id_produto = ?
+          WHERE id_variacao = ?
+            AND ativo = 1
         `,
-        [produtoEncontrado.id_produto],
+        [idVariacao],
       );
+
+      if (resultadoAtualizacao.changes !== 1) {
+        throw new Error("Nenhuma variação foi inativada.");
+      }
 
       await run(
         `
@@ -738,17 +750,17 @@ async function deletarProduto(req, res) {
           VALUES (?, ?, ?)
         `,
         [
-          "PRODUTO_EXCLUIDO",
+          "VARIACAO_INATIVADA",
           `variacao:${idVariacao}`,
           JSON.stringify({
-            id_produto: produtoEncontrado.id_produto,
+            id_produto: variacaoEncontrada.id_produto,
             id_variacao: idVariacao,
-            nome: produtoEncontrado.nome,
-            cor: produtoEncontrado.cor,
-            tamanho: produtoEncontrado.tamanho,
-            sku: produtoEncontrado.sku,
-            quantidade: produtoEncontrado.quantidade,
-            estoque_min: produtoEncontrado.estoque_min,
+            nome: variacaoEncontrada.nome,
+            cor: variacaoEncontrada.cor,
+            tamanho: variacaoEncontrada.tamanho,
+            sku: variacaoEncontrada.sku,
+            quantidade: variacaoEncontrada.quantidade,
+            estoque_min: variacaoEncontrada.estoque_min,
           }),
         ],
       );
@@ -756,15 +768,16 @@ async function deletarProduto(req, res) {
       await run("COMMIT");
 
       return res.json({
-        message: "Produto excluído com sucesso.",
+        message: "Variação excluída com sucesso.",
         produto: {
-          id_produto: produtoEncontrado.id_produto,
-          nome: produtoEncontrado.nome,
-          ativo: 0,
+          id_produto: variacaoEncontrada.id_produto,
+          nome: variacaoEncontrada.nome,
+          ativo: Number(variacaoEncontrada.produto_ativo),
         },
         variacao: {
           id_variacao: idVariacao,
-          sku: produtoEncontrado.sku,
+          sku: variacaoEncontrada.sku,
+          ativo: 0,
         },
       });
     } catch (error) {
@@ -772,10 +785,10 @@ async function deletarProduto(req, res) {
       throw error;
     }
   } catch (error) {
-    console.error("[PRODUTOS] erro ao excluir:", error);
+    console.error("[VARIACOES] erro ao excluir:", error);
 
     return res.status(500).json({
-      message: "Erro ao excluir produto.",
+      message: "Erro ao excluir variação.",
     });
   }
 }

@@ -150,6 +150,34 @@ public class ProdutoDAO {
         return -1;
     }
 
+    public static boolean variacaoEstaAtivaPorSku(String sku) {
+        String sql = """
+        SELECT ativo
+        FROM variacao_produto
+        WHERE sku = ?
+        """;
+
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
+
+            statement.setString(1, sku);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("ativo") == 1;
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException(
+                    "Erro ao consultar status ativo da variação por SKU.",
+                    erro
+            );
+        }
+
+        return false;
+    }
+
 
 
 

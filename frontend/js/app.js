@@ -544,7 +544,7 @@ function inicializarBotoesExclusaoProduto() {
       const skuProduto = botao.dataset.produtoSku || "";
 
       const confirmouExclusao = window.confirm(
-        `Deseja excluir o produto "${nomeProduto}"${skuProduto ? ` - ${skuProduto}` : ""}?`,
+        `Deseja excluir a variação "${skuProduto}" do produto "${nomeProduto}"?`,
       );
 
       if (!confirmouExclusao) return;

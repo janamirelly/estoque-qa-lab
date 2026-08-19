@@ -142,25 +142,25 @@ Isso pode indisponibilizar variações que deveriam permanecer ativas e operacio
 ## Evidências
 
 * **EVD-BUG-002-01 — Pré-condição no banco:** produto `id_produto = 217` ativo, contendo `BLU-PRETA-P` e `BLU-PRETA-M`, ambas ativas.
-  [Ver evidência](../evidencias/ct-est-exc-001/001-pre-condicao-banco.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/001-pre-condicao-banco.png)
 
 * **EVD-BUG-002-02 — Estado inicial na UI:** `BLU-PRETA-P` e `BLU-PRETA-M` apresentadas antes da operação.
-  [Ver evidência](../evidencias/ct-est-exc-001/002-estado-inicial-ui.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/002-estado-inicial-ui.png)
 
 * **EVD-BUG-002-03 — Confirmação da operação:** diálogo identificando especificamente `Blusa Canelada — BLU-PRETA-M`.
-  [Ver evidência](../evidencias/ct-est-exc-001/003-confirmacao-exclusao.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/003-confirmacao-exclusao.png)
 
 * **EVD-BUG-002-04 — Mensagem após a operação:** aplicação exibindo `Produto excluído com sucesso.`
-  [Ver evidência](../evidencias/ct-est-exc-001/004-mensagem-exclusao-sucesso.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/004-mensagem-exclusao-sucesso.png)
 
 * **EVD-BUG-002-05 — Pós-condição na UI:** consulta após a operação demonstrando o impacto sobre as variações do produto.
-  [Ver evidência](../evidencias/ct-est-exc-001/005-pos-condicao-ui.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/005-pos-condicao-ui.png)
 
 * **EVD-BUG-002-06 — Pós-condição da variação selecionada:** `BLU-PRETA-M` permanece com `variacao_ativa = 1`, enquanto o produto apresenta `produto_ativo = 0`.
-  [Ver evidência](../evidencias/ct-est-exc-001/006-pos-condicao-banco-variacao-m.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/006-pos-condicao-banco-variacao-m.png)
 
 * **EVD-BUG-002-07 — Pós-condição da variação não selecionada:** `BLU-PRETA-P` permanece com `variacao_ativa = 1`, enquanto o mesmo produto apresenta `produto_ativo = 0`.
-  [Ver evidência](../evidencias/ct-est-exc-001/007-pos-condicao-banco-variacao-p.png)
+  [Ver evidência](../evidencias/ct-est-exc-001/falha/007-pos-condicao-banco-variacao-p.png)
 
 ## Área provável para investigação
 
