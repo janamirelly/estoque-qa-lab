@@ -12,7 +12,7 @@
 - **Ambiente:** Desenvolvimento local
 - **Automação:** Sim
 - **Status:** Passou
-- - **Data da execução:** 19/08/2026
+- **Data da execução:** 19/08/2026
 
 ## Objetivo
 

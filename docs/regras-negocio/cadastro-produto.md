@@ -187,16 +187,33 @@ Após o cadastro, o produto e sua variação devem ficar disponíveis para consu
 Quando o cadastro for concluído com sucesso, o sistema deve exibir a mensagem:
 `Produto cadastrado com sucesso.`
 
-## RN-011 - Alteração do estoque mínimo da variação
-O usuário responsável pela gestão de estoque deve poder alterar o estoque mínimo de uma variação existente.
+## RN-011 — Alteração do estoque mínimo na edição da variação
 
-O estoque mínimo deve:
-- ser informado com número inteiro;
-- possuir valor maior ou igual a 10.
-- ser atualizado quando a alteração for salva com um valor válido.
+O usuário deve poder alterar o estoque mínimo de uma variação existente por meio da funcionalidade de edição.
 
-A quantidade atual em estoque não deve ser alterada por meio da edição do cadastro do produto, 
-pois alterações de quantidade devem ocorrer por movimentações de estoque.
+O estoque mínimo informado deve:
+
+- ser um número inteiro;
+- possuir valor maior ou igual a `10`;
+- ser persistido para a variação correspondente quando a alteração for salva com sucesso.
+
+Quando o usuário alterar somente o campo **Estoque mínimo**, os demais dados da variação que não forem modificados durante a edição devem permanecer inalterados.
+
+Em particular, a **quantidade atual em estoque** deve manter o valor existente quando não for modificada pelo usuário durante a edição.
+
+Quando a alteração for concluída com sucesso, o sistema deve exibir a mensagem:
+
+`Alteração salva com sucesso`
+
+### Fora do escopo da RN-011
+
+Esta regra não define:
+
+- quais outros campos da variação podem ou não ser alterados pela funcionalidade de edição;
+- se a quantidade atual pode ser modificada intencionalmente em outro cenário de edição;
+- regras de entrada, saída ou ajuste de estoque.
+
+Esses comportamentos devem possuir regras específicas caso sejam formalizados.
 
 ## RN-012 — Vínculo produto/variações
 

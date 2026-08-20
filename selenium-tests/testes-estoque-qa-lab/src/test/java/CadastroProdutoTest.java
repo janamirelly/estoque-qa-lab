@@ -104,6 +104,11 @@ public class CadastroProdutoTest {
         // Dado: que exista um produto cadastrado
         String sku = cadastrarProdutoParaTeste();
 
+        // E: registrar a quantidade atual antes da edição
+        int quantidadeAntes =
+                ProdutoDAO.obterQuantidadePorSku(sku);
+
+
         String novoEstoqueMinimo = MassaCadastroProduto.novoEstoqueMinimoValidoEdicao();
 
         // Quando: buscar o produto cadastrado
@@ -129,6 +134,21 @@ public class CadastroProdutoTest {
                 "O novo estoque mínimo não foi persistido no banco de dados.",
                 ProdutoDAO.existeProdutoComEstoqueMinimo(sku, novoEstoqueMinimo)
         );
+
+
+        // E: consultar novamente a quantidade após a edição
+        int quantidadeDepois =
+                ProdutoDAO.obterQuantidadePorSku(sku);
+
+        // E: a quantidade deve permanecer inalterada,
+        // pois somente o estoque mínimo foi modificado pelo usuário
+        assertEquals(
+                "A quantidade atual foi alterada indevidamente durante a edição do estoque mínimo.",
+                quantidadeAntes,
+                quantidadeDepois
+        );
+
+
     }
 
     @Test

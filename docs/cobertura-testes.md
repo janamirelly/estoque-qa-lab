@@ -212,7 +212,7 @@ O caso valida o cadastro utilizando dados válidos e confirma a persistência do
 
 ---
 
-### RN-011 — Alteração do estoque mínimo da variação
+### RN-011 — Alteração do estoque mínimo na edição da variação
 
 **CA relacionado:** `CA-011`  
 **Caso de teste:** `CT-EST-EDT-001`

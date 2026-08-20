@@ -207,7 +207,45 @@ public class ProdutoDAO {
     }
 
 
+    public static int obterQuantidadePorSku(String sku) {
 
+        String sql = """
+        SELECT e.quantidade
+        FROM variacao_produto vp
+        INNER JOIN estoque e
+            ON e.id_variacao = vp.id_variacao
+        WHERE vp.sku = ?
+        """;
 
+        try (Connection conexao = conectar();
+             PreparedStatement statement = conexao.prepareStatement(sql)) {
 
+            statement.setString(1, sku);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("quantidade");
+                }
+            }
+
+        } catch (Exception erro) {
+            throw new RuntimeException(
+                    "Erro ao consultar quantidade por SKU.",
+                    erro
+            );
+        }
+
+        throw new RuntimeException(
+                "Quantidade não encontrada para o SKU: " + sku
+        );
+    }
 }
+
+
+
+
+
+
+
+
+
