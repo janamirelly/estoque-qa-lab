@@ -20,10 +20,12 @@ public class NavegacaoEstoqueTest {
         driver.manage().window().maximize();
     }
 
-    //@After
-    //public void finalizarTeste() {
-     //driver.quit();
-    //}
+    @After
+    public void finalizarTeste() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
 
     @Test
     public void CT_EST_NAV_001_validarTelaInicialDoEstoque() {
