@@ -208,7 +208,7 @@ O caso valida o cadastro utilizando dados válidos e confirma a persistência do
 
 **Automação:** Sim  
 **Status:** Passou  
-**Situação:** Coberta - cenário prncipal
+**Situação:** Coberta - cenário principal
 
 ---
 

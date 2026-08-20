@@ -8,9 +8,12 @@
 * **Tipo:** Defeito funcional
 * **Severidade:** Alta
 * **Prioridade:** Alta
-* **Status:** Aberto
+* **Status:** Fechado
 * **Ambiente:** Desenvolvimento local
 * **Data de identificação:** 18/08/2026
+* **Data da correção:** 19/08/2026
+* **Data do reteste:** 19/08/2026
+* **Resultado do reteste:** Passou
 * **Regra relacionada:** RN-013 — Inativação lógica individual de variação
 * **Critério de aceite relacionado:** CA-013 — Inativar somente a variação selecionada
 * **Caso de teste relacionado:** CT-EST-EXC-001 — Inativar somente a variação selecionada
@@ -162,17 +165,33 @@ Isso pode indisponibilizar variações que deveriam permanecer ativas e operacio
 * **EVD-BUG-002-07 — Pós-condição da variação não selecionada:** `BLU-PRETA-P` permanece com `variacao_ativa = 1`, enquanto o mesmo produto apresenta `produto_ativo = 0`.
   [Ver evidência](../evidencias/ct-est-exc-001/falha/007-pos-condicao-banco-variacao-p.png)
 
-## Área provável para investigação
+## Causa-raiz confirmada
 
-Investigar o fluxo responsável pela exclusão/inativação acionada a partir da linha da variação, principalmente:
+A interface enviava corretamente o `id_variacao` correspondente à variação selecionada.
 
-* identificação da entidade recebida pelo backend;
-* utilização de `id_variacao` durante a operação;
-* atualização da tabela `variacao_produto`;
-* atualização indevida da tabela `produto`;
-* filtro utilizado pela consulta de estoque para produtos e variações ativas.
+O backend localizava essa variação, obtinha o `id_produto` relacionado e executava a inativação sobre a tabela `produto`:
 
-A causa-raiz não deve ser considerada confirmada até a análise da implementação.
+`UPDATE produto SET ativo = 0`
+
+Dessa forma, a operação destinada a uma única variação inativava o produto de origem.
+
+Como a consulta de estoque considera somente registros cujo produto e variação estão ativos, todas as variações vinculadas ao produto deixavam de ser apresentadas na interface, mesmo permanecendo com `variacao_produto.ativo = 1`.
+
+## Correção aplicada
+
+O fluxo foi alterado para realizar a inativação lógica diretamente sobre a variação selecionada:
+
+`UPDATE variacao_produto SET ativo = 0 WHERE id_variacao = ?`
+
+O estado do produto de origem não é mais alterado pela inativação individual de uma variação.
+
+Também foram ajustados:
+
+* a mensagem de confirmação da operação;
+* a mensagem de sucesso para `Variação excluída com sucesso.`;
+* o registro de auditoria;
+* a automação do CT-EST-EXC-001;
+* as validações de persistência no banco de dados.
 
 ## Observação adicional
 
@@ -184,14 +203,24 @@ Para a inativação individual da variação, a mensagem esperada é:
 
 Essa divergência é secundária ao defeito funcional principal e deve ser reavaliada após a correção do fluxo de inativação.
 
-## Critério para encerramento do BUG-002
+## Reteste
 
-O defeito poderá ser encerrado somente após:
+Após a correção, o CT-EST-EXC-001 foi reexecutado utilizando um produto com duas variações ativas vinculadas ao mesmo `id_produto`.
 
-* a variação selecionada assumir `variacao_produto.ativo = 0`;
-* o produto de origem permanecer ativo;
-* as demais variações permanecerem ativas;
-* somente a variação inativada deixar de aparecer na consulta;
-* a mensagem da operação estar coerente com a inativação de variação;
-* o CT-EST-EXC-001 ser reexecutado com resultado **Passou**;
-* novas evidências de reteste serem registradas.
+O reteste confirmou que:
+
+* o produto de origem permaneceu ativo;
+* somente a variação selecionada foi inativada;
+* a outra variação permaneceu ativa;
+* somente a variação inativada deixou de aparecer na consulta;
+* a mensagem `Variação excluída com sucesso.` foi apresentada;
+* o comportamento esperado foi confirmado no banco de dados;
+* a automação foi atualizada e executada com sucesso.
+
+**Resultado do reteste:** Passou.
+
+## Encerramento
+
+O defeito foi considerado corrigido após o reteste manual e a execução bem-sucedida do `CT-EST-EXC-001`.
+
+**Status final: Fechado**
