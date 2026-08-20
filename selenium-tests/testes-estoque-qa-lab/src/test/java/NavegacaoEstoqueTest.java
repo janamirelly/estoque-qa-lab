@@ -20,44 +20,61 @@ public class NavegacaoEstoqueTest {
         driver.manage().window().maximize();
     }
 
-    @After
-    public void finalizarTeste() {
-     driver.quit();
-    }
+    //@After
+    //public void finalizarTeste() {
+     //driver.quit();
+    //}
 
     @Test
-    public void CT01_estoqueTelaInicial() {
+    public void CT_EST_NAV_001_validarTelaInicialDoEstoque() {
 
-        //Dado: que o usuário acesse a página inicial do módulo estoque
+        // Dado: que o usuário acesse a página inicial do módulo estoque
         driver.get(VariaveisEstoque.URL_ESTOQUE);
 
-        //Então: a URL exibida deve ser a esperada do módulo estoque
-        assertEquals(VariaveisEstoque.URL_ESTOQUE, driver.getCurrentUrl());
+        // Então: a URL exibida deve ser a esperada
+        assertEquals(
+                VariaveisEstoque.URL_ESTOQUE,
+                driver.getCurrentUrl()
+        );
 
-        //E: o título da página deve estar visível para o usuário
-        assertEquals(VariaveisEstoque.TITULO_ESTOQUE, driver.getTitle());
+        // E: o título da página deve ser o esperado
+        assertEquals(
+                VariaveisEstoque.TITULO_ESTOQUE,
+                driver.getTitle()
+        );
 
-        //E: a página dashboard deve estar visível para o usuário
-        assert driver.findElement(ElementosEstoque.PG_DASHBOARD_ATIVA).isDisplayed();
-
-    }
-
-    @Test
-    public void CT02_estoqueMenuCadastro() {
-        //Dado: que o usuário esteja na página inicial do módulo estoque
-        driver.get(VariaveisEstoque.URL_ESTOQUE);
-
-        //E: o Dashboard esteja visível para o usuário
+        // E: o Dashboard deve estar visível
         assertTrue(
-                driver.findElement(ElementosEstoque.PG_DASHBOARD_ATIVA).isDisplayed());
+                "O Dashboard não está visível na tela inicial.",
+                driver.findElement(
+                        ElementosEstoque.PG_DASHBOARD_ATIVA
+                ).isDisplayed()
+        );
 
-        //Quando: clicar no botão Cadastrar Produto no menu lateral
-        driver.findElement(ElementosEstoque.BOTAO_CADASTRO).click();
+    }
 
-        //Então: a página de cadastro deve ficar ativa
-        assertTrue
-                (driver.findElement(ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA)
-                        .isDisplayed());
+    @Test
+    public void CT_EST_NAV_002_acessarCadastroPeloMenu() {
+        // Dado: que o usuário esteja na página inicial
+        driver.get(VariaveisEstoque.URL_ESTOQUE);
+
+        assertTrue(
+                driver.findElement(
+                        ElementosEstoque.PG_DASHBOARD_ATIVA
+                ).isDisplayed()
+        );
+
+        // Quando: clicar em Cadastrar Produto
+        driver.findElement(
+                ElementosEstoque.BOTAO_CADASTRO
+        ).click();
+
+        // Então: a página de cadastro deve ficar ativa
+        assertTrue(
+                driver.findElement(
+                        ElementosEstoque.PG_CADASTRO_PRODUTO_ATIVA
+                ).isDisplayed()
+        );
     }
 
 }

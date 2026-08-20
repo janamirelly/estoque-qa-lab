@@ -61,7 +61,7 @@ public class CadastroProdutoTest {
     //}
 
     @Test
-    public void CT04_cadastrarProdutoValido() {
+    public void CT_EST_CAD_004_cadastrarProdutoComDadosValidos() {
         // Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();

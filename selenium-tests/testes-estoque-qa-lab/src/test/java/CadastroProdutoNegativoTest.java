@@ -55,7 +55,7 @@ public class CadastroProdutoNegativoTest {
     //}
     
     @Test
-    public void CT01_CadCampoNomeVazio(){
+    public void CT_EST_CAD_001_bloquearCadastroComNomeVazio(){
         //Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeVazio();
         String cor = MassaCadastroProduto.corValida();
@@ -87,7 +87,7 @@ public class CadastroProdutoNegativoTest {
     }
 
     @Test
-    public void CT02_cadProdutoComSkuVazio(){
+    public void CT_EST_CAD_002_bloquearCadastroComSkuVazio(){
         //Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeProdutoValido();
         String cor = MassaCadastroProduto.corValida();
@@ -118,7 +118,7 @@ public class CadastroProdutoNegativoTest {
     }
 
     @Test
-    public void CT03_bloquearCadastroNomeAbaixoLimiteMinimo(){
+    public void CT_EST_CAD_003_bloquearCadastroComNomeAbaixoLimiteMinimo(){
         //Dado: que o usuário esteja na tela de cadastro
         String nomeProduto = MassaCadastroProduto.nomeAbaixoMinimo();
         String cor = MassaCadastroProduto.corValida();
