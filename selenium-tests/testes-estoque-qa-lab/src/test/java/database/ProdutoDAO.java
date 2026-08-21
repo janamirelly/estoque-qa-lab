@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.List;
 
 public class ProdutoDAO {
     private static final String CAMINHO_BANCO =
@@ -238,6 +239,202 @@ public class ProdutoDAO {
         throw new RuntimeException(
                 "Quantidade não encontrada para o SKU: " + sku
         );
+    }
+    public static void removerDadosTestePorSkus(List<String> skus) {
+
+        if (skus == null || skus.isEmpty()) {
+            return;
+        }
+
+        try (Connection conexao = conectar()) {
+
+            conexao.setAutoCommit(false);
+
+            try {
+
+                try (Statement statement = conexao.createStatement()) {
+                    statement.execute("PRAGMA foreign_keys = ON");
+                }
+
+                for (String sku : skus) {
+
+                    if (sku == null || sku.isBlank()) {
+                        continue;
+                    }
+
+                    int idVariacao;
+                    int idProduto;
+
+                    String sqlBuscarIds = """
+                    SELECT
+                        vp.id_variacao,
+                        vp.id_produto
+                    FROM variacao_produto vp
+                    WHERE vp.sku = ?
+                    """;
+
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(sqlBuscarIds)) {
+
+                        statement.setString(1, sku);
+
+                        try (ResultSet resultado = statement.executeQuery()) {
+
+                            if (!resultado.next()) {
+                                continue;
+                            }
+
+                            idVariacao =
+                                    resultado.getInt("id_variacao");
+
+                            idProduto =
+                                    resultado.getInt("id_produto");
+                        }
+                    }
+
+
+                    // 1. Remover movimentações vinculadas à variação
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(
+                                         """
+                                         DELETE FROM movimentacao_estoque
+                                         WHERE id_variacao = ?
+                                         """
+                                 )) {
+
+                        statement.setInt(1, idVariacao);
+                        statement.executeUpdate();
+                    }
+
+
+                    // 2. Remover o estoque da variação
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(
+                                         """
+                                         DELETE FROM estoque
+                                         WHERE id_variacao = ?
+                                         """
+                                 )) {
+
+                        statement.setInt(1, idVariacao);
+                        statement.executeUpdate();
+                    }
+
+
+                    // 3. Remover auditorias específicas da variação
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(
+                                         """
+                                         DELETE FROM auditoria
+                                         WHERE recurso = ?
+                                         """
+                                 )) {
+
+                        statement.setString(
+                                1,
+                                "variacao:" + idVariacao
+                        );
+
+                        statement.executeUpdate();
+                    }
+
+
+                    // 4. Remover a variação
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(
+                                         """
+                                         DELETE FROM variacao_produto
+                                         WHERE id_variacao = ?
+                                         """
+                                 )) {
+
+                        statement.setInt(1, idVariacao);
+                        statement.executeUpdate();
+                    }
+
+
+                    // 5. Verificar se o produto ainda possui variações
+                    int quantidadeVariacoes;
+
+                    try (PreparedStatement statement =
+                                 conexao.prepareStatement(
+                                         """
+                                         SELECT COUNT(*)
+                                         FROM variacao_produto
+                                         WHERE id_produto = ?
+                                         """
+                                 )) {
+
+                        statement.setInt(1, idProduto);
+
+                        try (ResultSet resultado =
+                                     statement.executeQuery()) {
+
+                            resultado.next();
+
+                            quantidadeVariacoes =
+                                    resultado.getInt(1);
+                        }
+                    }
+
+
+                    // 6. Remover o produto somente se não houver
+                    // nenhuma outra variação vinculada
+                    if (quantidadeVariacoes == 0) {
+
+                        try (PreparedStatement statement =
+                                     conexao.prepareStatement(
+                                             """
+                                             DELETE FROM auditoria
+                                             WHERE recurso = ?
+                                             """
+                                     )) {
+
+                            statement.setString(
+                                    1,
+                                    "produto:" + idProduto
+                            );
+
+                            statement.executeUpdate();
+                        }
+
+                        try (PreparedStatement statement =
+                                     conexao.prepareStatement(
+                                             """
+                                             DELETE FROM produto
+                                             WHERE id_produto = ?
+                                             """
+                                     )) {
+
+                            statement.setInt(1, idProduto);
+                            statement.executeUpdate();
+                        }
+                    }
+                }
+
+                conexao.commit();
+
+            } catch (Exception erro) {
+
+                conexao.rollback();
+
+                throw new RuntimeException(
+                        "Erro ao remover massa de dados criada pelos testes.",
+                        erro
+                );
+            }
+
+        } catch (Exception erro) {
+
+            if (erro instanceof RuntimeException) {
+                throw (RuntimeException) erro;
+            }
+
+            throw new RuntimeException(
+                    "Erro ao executar limpeza da massa de testes.",
+                    erro
+            );
+        }
     }
 }
 

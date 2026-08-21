@@ -4,6 +4,8 @@ import massas.MassaCadastroProduto;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import java.util.List;
+import java.util.ArrayList;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,6 +23,7 @@ import static org.junit.Assert.*;
 
 public class CadastroProdutoTest {
     private WebDriver driver;
+    private final List<String> skusCriadosNoTeste = new ArrayList<>();
 
     private static final String MSG_PRODUTO_CADASTRADO =
             "Produto cadastrado com sucesso";
@@ -55,10 +58,32 @@ public class CadastroProdutoTest {
                         .isDisplayed()
         );
     }
+
     @After
     public void finalizarTeste() {
-        if (driver != null) {
-            driver.quit();
+
+        try {
+            ProdutoDAO.removerDadosTestePorSkus(skusCriadosNoTeste);
+
+            for (String sku : skusCriadosNoTeste) {
+                System.out.println(
+                        "[CLEANUP] Validando remoção do SKU: " + sku
+                );
+
+                if (ProdutoDAO.existeProdutoPorSku(sku)) {
+                    throw new AssertionError(
+                            "A massa de teste não foi removida para o SKU: " + sku
+                    );
+                }
+            }
+
+        } finally {
+
+            if (driver != null) {
+                driver.quit();
+            }
+
+            skusCriadosNoTeste.clear();
         }
     }
 
@@ -69,6 +94,7 @@ public class CadastroProdutoTest {
         String cor = MassaCadastroProduto.corValida();
         String tamanho = MassaCadastroProduto.tamanhoValido();
         String sku = MassaCadastroProduto.skuValido();
+        skusCriadosNoTeste.add(sku);
         String preco = MassaCadastroProduto.precoValido();
         String quantidadeInicial =
                 MassaCadastroProduto.quantidadeInicialValida();
@@ -165,6 +191,9 @@ public class CadastroProdutoTest {
 
         String skuVariacaoM =
                 "BLU" + sufixo + "-PRETA-M";
+
+        skusCriadosNoTeste.add(skuVariacaoP);
+        skusCriadosNoTeste.add(skuVariacaoM);
 
         String preco = MassaCadastroProduto.precoValido();
         String quantidadeInicial =
@@ -314,6 +343,9 @@ public class CadastroProdutoTest {
 
         String skuSegundaVariacao =
                 "BLU" + sufixo + "-PRETA-M";
+
+        skusCriadosNoTeste.add(skuPrimeiraVariacao);
+        skusCriadosNoTeste.add(skuSegundaVariacao);
 
         String preco = MassaCadastroProduto.precoValido();
         String quantidadeInicial =
